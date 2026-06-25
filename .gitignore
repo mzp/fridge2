@@ -1,7 +1,9 @@
 node_modules/
 dist/
+logs/
 *.log
 
-# Local env overrides
+# Env files (real secrets live here; .env.example is committed instead)
+.env
 .env.local
 .env.*.local
