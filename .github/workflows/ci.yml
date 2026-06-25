@@ -28,3 +28,19 @@ jobs:
 
       # Verify the production build compiles (what Render runs on deploy).
       - run: npm run build
+
+      # Fail if schema.ts has changes not captured in a committed migration
+      # (i.e. someone edited the schema but forgot `npm run db:generate`).
+      # generate runs offline from the schema + migration snapshots; the dummy
+      # DATABASE_URL only satisfies drizzle.config.ts — it never connects.
+      - name: Check migrations are up to date
+        env:
+          DATABASE_URL: postgres://unused
+        run: |
+          npm run db:generate
+          if [ -n "$(git status --porcelain db/migrations)" ]; then
+            echo "::error::schema.ts has uncommitted migration changes. Run 'npm run db:generate' and commit db/migrations/."
+            git status --porcelain db/migrations
+            git --no-pager diff -- db/migrations
+            exit 1
+          fi
