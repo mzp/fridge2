@@ -121,5 +121,7 @@ Render: New → Blueprint → select repo (reads render.yaml)
 
 ## Working Agreements
 
-- **Never commit without explicit permission.** Stage and show changes, but do not
-  run `git commit` (or push) until the user asks for it.
+- **Always get explicit permission before `git commit`, `git push`, or opening a
+  pull request.** Make and stage changes and show them, but do not commit, push, or
+  create PRs until the user asks for it. Ask each time — permission for one of these
+  actions does not carry over to the next, even mid-task.
