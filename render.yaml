@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: fridge
+    runtime: node
+    plan: free
+    # devDependencies (typescript, tsc-alias) are needed at build time, so force
+    # their install even though Render sets NODE_ENV=production.
+    buildCommand: npm install --include=dev && npm run build
+    startCommand: npm run start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_VERSION
+        value: 26.1.0
