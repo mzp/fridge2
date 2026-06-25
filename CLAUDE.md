@@ -1,107 +1,125 @@
 # Fridge
 
-Fridge is a meal planning system exposed as a public, OAuth-protected MCP server
-with a companion web UI.
+Meal planning system: a public, OAuth-protected MCP server integrated into a Hono
+web app. This file is the **command & procedure reference**. The reasoning behind
+these choices lives in `docs/`:
 
-## Design Direction
+- [docs/001-techstack.md](./docs/001-techstack.md) — tech stack & repo layout (why).
+- [docs/002-user.md](./docs/002-user.md) — users, auth, no-signup flow (why).
+- [docs/003-render.md](./docs/003-render.md) — Render hosting & dev-vs-prod DB handling (why).
+- [docs/004-test.md](./docs/004-test.md) — testing setup (why).
+- [docs/005-npm-command.md](./docs/005-npm-command.md) — every npm script, explained.
 
-- **Public deployment first.** The server is built to run on the public internet,
-  not just locally. Assume untrusted clients.
-- **OAuth-based MCP.** MCP access is authenticated via OAuth (Streamable HTTP
-  transport), not an unauthenticated local stdio process. Auth is a first-class
-  concern, designed in from the start rather than bolted on.
-- **MCP integrated into the web server.** MCP is served by the same Hono process
-  as the web UI (one deployment, one auth layer), not a separate stdio process.
-  Because of this, app code lives directly under `src/` rather than being split
-  into `src/web` and `src/mcp`.
-- **No signup flow.** The admin account is provisioned via the seed script
-  (`db/seed.ts`). Its name and password come from the environment (`SEED_ADMIN_*`,
-  see `.env.example`), so nothing user-specific is committed. `name` is the unique
-  login identifier. The password is hashed with scrypt at seed time and only the
-  hash is stored.
-
-## Tech Stack
-
-- Runtime: Node.js, managed via Volta (`package.json` `volta.node`).
-- Package manager: npm.
-- Web server: Hono on `@hono/node-server`.
-- Language: TypeScript. `tsx` for local dev; production runs compiled JS from `dist/`.
-- Build: `tsc` + `tsc-alias` (rewrites the `@/*` alias to relative paths so plain `node` can run the output).
-- Database: PostgreSQL (local via Docker Compose, prod via Render Postgres).
-- ORM: Drizzle (`drizzle-orm/node-postgres`); migrations via `drizzle-kit`.
-- Auth: session via signed httpOnly cookie (`hono/jwt`); passwords hashed with
-  Node's built-in `crypto.scrypt` (no native dependency).
-- Testing: Vitest. DB-backed tests run against in-memory Postgres (PGlite), so no
-  Docker is needed to run the suite.
-- Lint/format: Biome.
-- Hosting: Render (free plan), configured via `render.yaml`.
+Run npm commands through `volta run` so the pinned Node.js version is used.
 
 ## Repository Layout
 
 ```text
 src/
-  index.ts        Server entrypoint (runs migrations, then starts Hono)
+  index.ts        Server entrypoint (in prod: migrate + seed admin, then start Hono)
   app.ts          App assembly and route mounting
   auth.ts         Session cookie + auth middleware (sessionMiddleware, requireAuth)
   db/
     schema.ts     Drizzle schema
     index.ts      DB connection (reads DATABASE_URL)
-    migrate.ts    Applies migrations on startup
+    migrate.ts    runMigrations: applies committed migrations (used in prod on boot)
+    seed.ts       seedAdmin: idempotent admin upsert from SEED_ADMIN_*
   lib/
     password.ts   scrypt hash/verify
   routes/         Hono route modules (auth, home)
 db/
-  migrations/     drizzle-kit migrations (committed)
-  seed.ts         Seed users (no signup flow)
+  migrations/     drizzle-kit migrations (committed; the source of truth for prod)
+scripts/
+  seed.ts         Dev seed CLI (npm run db:seed)
+  reset.ts        Dev DB reset: drop schemas so db:reset can rebuild
 tests/            Vitest tests (+ helpers/db.ts: PGlite test DB)
 ```
 
 The `@/*` path alias maps to `src/*`, and `@test/*` to `tests/*`.
 
-## Commands
-
-Run npm commands through `volta run` so the pinned Node.js version is used.
+## Setup
 
 ```bash
-volta run npm install        # install dependencies
-volta run npm run db:up      # start local Postgres (docker compose)
-volta run npm run db:down    # stop local Postgres
-volta run npm run db:generate # generate a migration from schema changes
-volta run npm run db:seed    # seed admin user (needs SEED_ADMIN_* in .env)
-volta run npm run dev        # tsx watch on :3000 (local dev)
-volta run npm run build      # compile TS to dist/ via tsc + tsc-alias
-volta run npm run start      # run compiled dist/index.js (what prod runs)
-volta run npm run typecheck  # tsc --noEmit
-volta run npm run lint       # biome check src tests
-volta run npm run format     # biome format --write src tests
-volta run npm test           # vitest run
+cp .env.example .env          # then fill SEED_ADMIN_PASSWORD
+volta run npm install
+volta run npm run db:up       # start local Postgres (Docker)
+volta run npm run db:reset    # push schema + seed admin into a clean dev DB
+volta run npm run dev         # tsx watch on :3000
 ```
 
-Local setup: `cp .env.example .env`, fill `SEED_ADMIN_*`, then
-`db:up` → `db:seed` → `dev`. `PORT` overrides the default port (3000); Render
-injects `PORT` at runtime.
+`PORT` overrides the default port (3000). `.env` is gitignored; secrets
+(`DATABASE_URL`, `SESSION_SECRET`, `SEED_ADMIN_*`) live there locally and in the
+Render dashboard in prod.
 
-`.env` is gitignored and holds local secrets (`DATABASE_URL`, `SESSION_SECRET`,
-`SEED_ADMIN_*`). In production set these in the Render dashboard instead.
+Full npm command reference: [docs/005-npm-command.md](./docs/005-npm-command.md).
 
-## Deployment
+## Workflows
 
-Hosted on Render's free plan as a web service, defined in `render.yaml`:
+Task workflows, organized by phase: **develop → test → finalize → deploy**. Each
+phase groups its steps by area (currently **Database**; more, e.g. views, will be
+added here).
 
-- Build: `npm install --include=dev && npm run build` — `--include=dev` is required
-  because Render sets `NODE_ENV=production`, which would otherwise skip the
-  `typescript`/`tsc-alias` devDependencies needed to build.
-- Start: `npm run start` (`node dist/index.js`).
-- Health check: `GET /health`.
-- Node version pinned via `NODE_VERSION` (render.yaml) and `.node-version`.
-- Required env vars (set in the Render dashboard, not committed): `DATABASE_URL`
-  (Render Postgres), `SESSION_SECRET`.
+### Develop
 
-Free-plan caveats to design around: the service sleeps after ~15 min idle
-(30–60s cold start on next request), and there is no persistent disk — durable
-state lives in Render's managed Postgres, not on the instance.
+**Database** — push-centric, no migration files yet:
 
-## Notes
+```bash
+# edit src/db/schema.ts, then:
+volta run npm run db:push     # apply the new shape to the dev DB (incl. drops)
+volta run npm run db:reset    # or rebuild a clean dev DB: drop + push + seed
+volta run npm run db:seed     # seed admin only (from SEED_ADMIN_* in .env)
+```
 
-- This is a fresh implementation. Architectural choices are recorded here as new
-  decisions rather than inherited assumptions.
+### Test
+
+Automated — run the full suite for any change (tests run against the committed
+migrations — see [docs/004-test.md](./docs/004-test.md)):
+
+```bash
+volta run npm run check       # typecheck + lint + tests
+```
+
+Manual — exercise it in a browser at http://localhost:3000:
+
+```bash
+volta run npm run db:up       # Postgres running (if not already)
+volta run npm run db:reset    # ensure schema + admin are present
+volta run npm run dev         # tsx watch on :3000
+# open http://localhost:3000 → /login → name "admin" + your SEED_ADMIN_PASSWORD
+```
+
+### Finalize
+
+Wrap up the change before opening a pull request.
+
+**Database** — turn the pushed schema into a committed migration:
+
+```bash
+volta run npm run db:generate # create a committed migration from schema.ts
+volta run npm run db:migrate  # (optional) apply locally to verify the prod path
+volta run npm run check       # confirm everything passes against the migration
+# commit db/migrations/* with the change, then open the PR
+```
+
+> Generate and commit the migration before the PR — `db/migrations/` is the source
+> of truth production applies on boot. Why this dev-vs-prod split exists:
+> [docs/003-render.md](./docs/003-render.md).
+
+### Deploy
+
+Deploys are automatic: merging to `main` triggers Render to rebuild and, on boot,
+re-apply migrations and re-seed the admin. No manual step.
+
+One-time setup (first deploy only; details and caveats in
+[docs/003-render.md](./docs/003-render.md)):
+
+```text
+Render: New → Blueprint → select repo (reads render.yaml)
+→ enter SEED_ADMIN_PASSWORD when prompted
+→ Apply  (on boot: auto migrate + seed admin; /health turns green)
+```
+
+## Working Agreements
+
+- **Never commit without explicit permission.** Stage and show changes, but do not
+  run `git commit` (or push) until the user asks for it.

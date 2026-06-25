@@ -12,10 +12,14 @@
     "format": "biome format --write src tests",
     "test": "vitest run",
     "test:watch": "vitest",
+    "check": "npm run typecheck && npm run lint && npm run test",
     "db:up": "docker compose up -d",
     "db:down": "docker compose down",
+    "db:push": "drizzle-kit push",
     "db:generate": "drizzle-kit generate",
-    "db:seed": "tsx --env-file-if-exists=.env db/seed.ts"
+    "db:migrate": "drizzle-kit migrate",
+    "db:seed": "tsx --env-file-if-exists=.env scripts/seed.ts",
+    "db:reset": "tsx --env-file-if-exists=.env scripts/reset.ts && npm run db:push && npm run db:seed"
   },
   "license": "ISC",
   "volta": {
