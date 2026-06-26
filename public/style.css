@@ -1,18 +1,47 @@
 @import "tailwindcss";
 
 /*
- * Semantic component classes. Keep raw utility classes (especially colors) out of
- * the markup — the palette (emerald primary, red danger, gray muted) lives here, so
- * a restyle is one file. See docs/007-tailwind.md.
+ * Color palette. Change these tokens to restyle the whole app — components below
+ * reference them (bg-primary, text-danger, …), never raw color utilities. See
+ * docs/007-tailwind.md.
  */
+@theme {
+  --color-primary: #059669;
+  --color-primary-hover: #047857;
+  --color-secondary: #4b5563;
+  --color-secondary-hover: #374151;
+  --color-danger: #dc2626;
+  --color-danger-hover: #b91c1c;
+}
+
 @layer components {
+  /* App shell */
+  .app-body {
+    @apply min-h-screen bg-gray-50 text-gray-900;
+  }
+  .site-header {
+    @apply border-b border-gray-200 bg-white;
+  }
+  .site-nav {
+    @apply mx-auto flex max-w-2xl items-center gap-6 px-4 py-3;
+  }
+  .brand {
+    @apply font-bold text-primary;
+  }
+  .nav-auth {
+    @apply ml-auto flex items-center gap-3;
+  }
+  .nav-user {
+    @apply text-sm text-gray-600;
+  }
   .page {
-    @apply max-w-lg mx-auto px-4 py-8;
+    @apply mx-auto max-w-lg px-4 py-8;
   }
   .page-title {
-    @apply text-2xl font-bold text-emerald-600 mb-6;
+    @apply mb-6 text-2xl font-bold text-primary;
   }
 
+  /* Forms */
   .form {
     @apply flex flex-col gap-4;
   }
@@ -20,22 +49,29 @@
     @apply flex flex-col gap-1 text-sm font-medium text-gray-700;
   }
   .form-input {
-    @apply rounded border border-gray-300 px-3 py-2 text-base text-gray-900 focus:border-emerald-500 focus:outline-none;
+    @apply rounded border border-gray-300 px-3 py-2 text-base text-gray-900 focus:border-primary focus:outline-none;
   }
   .form-error {
-    @apply rounded border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-700;
+    @apply rounded border border-danger bg-red-50 px-3 py-2 text-sm text-danger;
   }
 
+  /* Buttons */
   .btn {
     @apply inline-flex items-center justify-center rounded border font-medium transition-colors;
+  }
+  .btn-sm {
+    @apply px-3 py-1 text-sm;
   }
   .btn-md {
     @apply px-4 py-2;
   }
   .btn-primary {
-    @apply border-emerald-600 bg-emerald-600 text-white hover:border-emerald-700 hover:bg-emerald-700;
+    @apply border-primary bg-primary text-white hover:border-primary-hover hover:bg-primary-hover;
   }
   .btn-secondary {
-    @apply border-gray-300 bg-white text-gray-700 hover:bg-gray-50;
+    @apply border-gray-300 bg-white text-secondary hover:bg-gray-50;
+  }
+  .btn-danger {
+    @apply border-danger text-danger hover:bg-red-50;
   }
 }

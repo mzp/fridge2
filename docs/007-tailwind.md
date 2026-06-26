@@ -20,45 +20,61 @@ Why this shape:
   (ships the whole engine, compiles in the browser, no purge). A built,
   content-scanned stylesheet is what we serve.
 
-## Semantic classes, not inline utilities
+## Palette tokens (`@theme`)
 
-**Do not scatter raw utility classes (especially colors) across the markup.** Define
-**semantic component classes** in `public/style.css` with `@apply` inside
-`@layer components`, and apply those names in the templates. The palette (emerald
-primary, red danger, gray for muted text/borders) lives in the stylesheet, not in the
-views — so a restyle is one file, and the markup reads by intent.
-
-`public/style.css`:
+Colors are named tokens defined once in a `@theme` block, so a restyle is one place.
+Tailwind turns each `--color-<name>` into utilities (`bg-primary`, `text-danger`, …)
+that the component classes consume — never raw scale colors like `emerald-600`.
 
 ```css
 @import "tailwindcss";
 
+@theme {
+  --color-primary: #059669;
+  --color-primary-hover: #047857;
+  --color-secondary: #4b5563;
+  --color-secondary-hover: #374151;
+  --color-danger: #dc2626;
+  --color-danger-hover: #b91c1c;
+}
+```
+
+## Semantic classes, not inline utilities
+
+**Do not scatter raw utility classes (especially colors) across the markup.** Define
+**semantic component classes** in `public/style.css` with `@apply` inside
+`@layer components`, referencing the palette tokens, and apply those names in the
+templates — so the markup reads by intent.
+
+```css
 @layer components {
-  .page {
-    @apply max-w-lg mx-auto px-4 py-8;
-  }
   .page-title {
-    @apply text-2xl font-bold text-emerald-600 mb-6;
+    @apply mb-6 text-2xl font-bold text-primary;
   }
   .btn {
     @apply inline-flex items-center justify-center rounded border font-medium transition-colors;
   }
-  .btn-md {
-    @apply px-4 py-2;
-  }
   .btn-primary {
-    @apply border-emerald-600 bg-emerald-600 text-white hover:border-emerald-700 hover:bg-emerald-700;
+    @apply border-primary bg-primary text-white hover:border-primary-hover hover:bg-primary-hover;
   }
   .btn-danger {
-    @apply border-red-300 text-red-600 hover:bg-red-50;
+    @apply border-danger text-danger hover:bg-red-50;
   }
 }
 ```
 
-In a view: `<h1 class="page-title">…</h1>`, `<button class="btn btn-md btn-danger">…</button>`.
+In a view: `<h1 class="page-title">…</h1>`, `<button class="btn btn-md btn-primary">…</button>`.
 Raw utilities are fine only for one-off layout (`class="flex gap-3"`); anything with a
-color or reused across pages becomes a semantic class (e.g. `.form-control`,
-`.btn-secondary`, `.data-table-*`), defined the same way in `public/style.css`.
+color or reused across pages becomes a semantic class, defined the same way against
+the palette tokens.
+
+## Layout shell
+
+`src/views/layout.ts` is the page shell every view wraps with: the document head
+(loads `/dist.css`), a `.site-header` with the brand (showing `Fridge[dev]` outside
+production) and — when a user is signed in — their name and a sign-out button, then
+the page content in a centered `.page` container. Views call
+`layout(title, body, { user })`.
 
 ## Serving the stylesheet
 
