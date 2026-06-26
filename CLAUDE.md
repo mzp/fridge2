@@ -149,7 +149,9 @@ Render: New → Blueprint → select repo (reads render.yaml)
 - **Always get explicit permission before `git commit`, `git push`, or opening a
   pull request.** Make and stage changes and show them, but do not commit, push, or
   create PRs until the user asks for it. Ask each time — permission for one of these
-  actions does not carry over to the next, even mid-task.
+  actions does not carry over to the next, even mid-task. In particular, **commit
+  and push are separate**: being told to commit does not authorize a push, and vice
+  versa. Get a separate go-ahead for each.
 - **`.gitignore` is only for files this project generates** (build output, deps,
   reports, logs, local secrets). OS- and editor-generated files (e.g. `.DS_Store`)
   go in `.git/info/exclude` instead — they are personal/local, so they don't belong
