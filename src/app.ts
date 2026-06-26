@@ -4,6 +4,7 @@ import { type AppEnv, sessionMiddleware } from "@/auth.js";
 import type { Db } from "@/db/index.js";
 import { users } from "@/db/schema.js";
 import { seedAdmin } from "@/db/seed.js";
+import { mcpHandler } from "@/mcp/index.js";
 import { createAuthRoutes } from "@/routes/auth.js";
 import { createHomeRoutes } from "@/routes/home.js";
 
@@ -14,6 +15,10 @@ export function createApp(db: Db) {
   // Compiled Tailwind stylesheet. Before the session middleware — a static asset
   // needs no session.
   app.use("/dist.css", serveStatic({ path: "./public/dist.css" }));
+
+  // Phase 1: MCP over Streamable HTTP, no auth yet. Before the session middleware
+  // so it stays independent of the web UI's cookie session.
+  app.all("/mcp", mcpHandler(db));
 
   app.use("*", sessionMiddleware(db));
   app.route("/", createAuthRoutes(db));

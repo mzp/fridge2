@@ -10,6 +10,9 @@ Rules for files under `tests/`. (Why testing is set up this way:
   `src/lib/password.ts` → `tests/lib/password.test.ts`.
 - `tests/e2e/` is named after the URL/page under test, not the source file:
   the `/login` flow → `tests/e2e/login.spec.ts`.
+- `tests/mcp/` tests MCP tools over real HTTP (the app served on an ephemeral
+  port, driven by an MCP client); one file per tool, named after it (the `ping`
+  tool → `tests/mcp/ping.test.ts`).
 
 ## Layers
 

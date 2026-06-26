@@ -31,6 +31,7 @@ src/
     seed.ts       seedAdmin: idempotent admin upsert from SEED_ADMIN_*
   lib/
     password.ts   scrypt hash/verify
+  mcp/            MCP server (index.ts) + one file per tool (ping.ts); at /mcp
   routes/         Hono route modules (auth, home)
   views/          hono/html page templates (layout, login, home)
 public/
