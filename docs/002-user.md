@@ -1,5 +1,7 @@
 # 002 — Users & Auth (No Signup Flow)
 
+**Status:** Implemented
+
 ## No signup flow
 
 There is intentionally no self-service registration. Accounts are provisioned out

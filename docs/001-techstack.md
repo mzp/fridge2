@@ -1,5 +1,7 @@
 # 001 — Tech Stack
 
+**Status:** Implemented
+
 Why the stack looks the way it does. For the actual commands, see
 [CLAUDE.md](../CLAUDE.md).
 

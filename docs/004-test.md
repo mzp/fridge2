@@ -1,5 +1,7 @@
 # 004 — Testing
 
+**Status:** Implemented
+
 Why testing is set up the way it is. For the command, see [CLAUDE.md](../CLAUDE.md):
 `npm run check` runs the whole suite (typecheck → lint → tests) in one shot.
 

@@ -1,5 +1,7 @@
 # 003 — Render Hosting & Dev-vs-Prod DB Handling
 
+**Status:** Implemented
+
 Why hosting and DB lifecycle work the way they do. For the actual commands and
 deploy steps, see [CLAUDE.md](../CLAUDE.md).
 
