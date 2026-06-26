@@ -42,6 +42,12 @@ describe("mcp: ping (OAuth-protected, over HTTP)", () => {
     expect(res.headers.get("www-authenticate")).toContain("resource_metadata");
   });
 
+  it("does not advertise scopes (DCR clients would otherwise hit invalid_scope)", async () => {
+    const res = await fetch(`${srv.baseUrl}/.well-known/oauth-authorization-server`);
+    const meta = (await res.json()) as { scopes_supported?: string[] };
+    expect(meta.scopes_supported ?? []).toEqual([]);
+  });
+
   it("exposes the ping tool with a valid token", async () => {
     const client = await connect(accessToken);
     const { tools } = await client.listTools();

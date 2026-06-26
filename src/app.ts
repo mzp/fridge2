@@ -4,6 +4,7 @@ import type { Db } from "@/db/index.js";
 import { users } from "@/db/schema.js";
 import { seedAdmin } from "@/db/seed.js";
 import { mcpHandler } from "@/mcp/index.js";
+import { requestLogger } from "@/middlewares/logger.js";
 import { requireBearer } from "@/middlewares/oauth.js";
 import { type AppEnv, sessionMiddleware } from "@/middlewares/session.js";
 import { createAuthRoutes } from "@/routes/auth.js";
@@ -35,11 +36,14 @@ export function createApp(db: Db) {
   // needs no session.
   app.use("/dist.css", serveStatic({ path: "./public/dist.css" }));
 
+  // Log everything below (health/dist.css above are skipped to avoid noise).
+  app.use("*", requestLogger);
+
   // OAuth authorization server. The provider reuses the login session at
   // /authorize; discovery metadata is served at the well-known root, the operation
-  // endpoints under /oauth. Config (issuer, name, scopes) is owned here.
+  // endpoints under /oauth. Config (issuer, name) is owned here.
   const provider = createOAuthProvider(db);
-  const oauth: OAuthConfig = { baseUrl, resourceName: "Fridge MCP", scopes: ["mcp"] };
+  const oauth: OAuthConfig = { baseUrl, resourceName: "Fridge MCP" };
   app.route("/", createWellKnownRoutes(provider, oauth));
   app.route("/oauth", createOAuthRoutes(provider));
 

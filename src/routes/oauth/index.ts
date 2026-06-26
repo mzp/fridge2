@@ -17,8 +17,6 @@ export interface OAuthConfig {
   baseUrl: string;
   /** Human-readable name shown in the protected-resource metadata. */
   resourceName: string;
-  /** OAuth scopes advertised by the server. */
-  scopes: string[];
 }
 
 /**
@@ -27,10 +25,12 @@ export interface OAuthConfig {
  * {@link createOAuthRoutes}).
  */
 export function createWellKnownRoutes(provider: OAuthServerProvider, config: OAuthConfig) {
+  // No scopes_supported is advertised: the server doesn't model scopes, so clients
+  // must not request one (else the authorize handler rejects an "unregistered"
+  // scope — e.g. ChatGPT requesting `mcp`).
   const metadata = createOAuthMetadata({
     provider,
     issuerUrl: new URL(config.baseUrl),
-    scopesSupported: config.scopes,
   });
   metadata.authorization_endpoint = `${config.baseUrl}/oauth/authorize`;
   metadata.token_endpoint = `${config.baseUrl}/oauth/token`;
@@ -41,7 +41,6 @@ export function createWellKnownRoutes(provider: OAuthServerProvider, config: OAu
     oauthMetadata: metadata,
     resourceServerUrl: new URL(config.baseUrl),
     resourceName: config.resourceName,
-    scopesSupported: config.scopes,
   });
 }
 
