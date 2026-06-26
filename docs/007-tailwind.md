@@ -3,7 +3,7 @@
 **Status:** Implemented
 
 How styling works and why it is wired this way. Commands live in the Develop/UI
-workflow in [AGENTS.md](../AGENTS.md).
+workflow in [CLAUDE.md](../CLAUDE.md).
 
 ## Approach
 

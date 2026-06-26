@@ -1,6 +1,22 @@
 # Tests — conventions
 
-See [AGENTS.md](./AGENTS.md) in this directory — shared by all coding agents
-(Claude Code, opencode, etc.).
+Conventions for files under `tests/`. (Why testing is set up this way:
+[docs/004-test.md](../docs/004-test.md).)
 
-@AGENTS.md
+## Naming
+
+- `tests/lib/` and `tests/routes/` mirror the source module they test:
+  `src/routes/auth.ts` → `tests/routes/auth.test.ts`,
+  `src/lib/password.ts` → `tests/lib/password.test.ts`.
+- `tests/e2e/` is named after the URL/page under test, not the source file:
+  the `/login` flow → `tests/e2e/login.spec.ts`.
+- `tests/mcp/` tests MCP tools over real HTTP (the app served on an ephemeral
+  port, driven by an MCP client); one file per tool, named after it (the `ping`
+  tool → `tests/mcp/ping.test.ts`).
+
+## Layers
+
+- The happy path belongs in `tests/e2e` (browser flows) or `tests/mcp` (MCP flows
+  over HTTP) — whichever interface owns it.
+- `tests/routes` (vitest) keeps the fast negative/edge cases. Don't duplicate a
+  scenario already covered by an e2e or mcp test.
