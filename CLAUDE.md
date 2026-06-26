@@ -32,7 +32,12 @@ db/
 scripts/
   seed.ts         Dev seed CLI (npm run db:seed)
   reset.ts        Dev DB reset: drop schemas so db:reset can rebuild
-tests/            Vitest tests (+ helpers/db.ts: PGlite test DB)
+  start-e2e.ts    E2E web server: ensure test DB, migrate, seed, serve
+tests/
+  lib/            Unit tests
+  routes/         Route/integration tests (app.request)
+  e2e/            Playwright browser tests + committed screenshot baselines
+  helpers/        db.ts (PGlite test DB), e2e.ts (reset helper)
 ```
 
 The `@/*` path alias maps to `src/*`, and `@test/*` to `tests/*`.
@@ -76,7 +81,16 @@ Automated — run the full suite for any change (tests run against the committed
 migrations — see [docs/004-test.md](./docs/004-test.md)):
 
 ```bash
-volta run npm run check       # typecheck + lint + tests
+volta run npm run check       # typecheck + lint + unit/route tests
+```
+
+End-to-end (Playwright, in Docker; includes visual snapshots — see
+[docs/004-test.md](./docs/004-test.md)):
+
+```bash
+volta run npm run db:up       # Postgres running (if not already)
+volta run npm run e2e         # browser tests in the Playwright Docker image
+volta run npm run e2e:update  # regenerate screenshot baselines after an intended UI change
 ```
 
 Manual — exercise it in a browser at http://localhost:3000:
@@ -105,6 +119,17 @@ volta run npm run check       # confirm everything passes against the migration
 > of truth production applies on boot. Why this dev-vs-prod split exists:
 > [docs/003-render.md](./docs/003-render.md).
 
+**UI** — if the change alters how a page renders, refresh the screenshot baselines:
+
+```bash
+volta run npm run e2e:update  # regenerate screenshot baselines (Docker/Linux)
+volta run npm run e2e         # confirm they pass
+# commit the updated tests/e2e/**-snapshots/*.png with the change
+```
+
+> Commit the updated baselines so the UI change appears as an image diff in the PR
+> for review. Why we do this: [docs/004-test.md](./docs/004-test.md).
+
 ### Deploy
 
 Deploys are automatic: merging to `main` triggers Render to rebuild and, on boot,
@@ -124,4 +149,10 @@ Render: New → Blueprint → select repo (reads render.yaml)
 - **Always get explicit permission before `git commit`, `git push`, or opening a
   pull request.** Make and stage changes and show them, but do not commit, push, or
   create PRs until the user asks for it. Ask each time — permission for one of these
-  actions does not carry over to the next, even mid-task.
+  actions does not carry over to the next, even mid-task. In particular, **commit
+  and push are separate**: being told to commit does not authorize a push, and vice
+  versa. Get a separate go-ahead for each.
+- **`.gitignore` is only for files this project generates** (build output, deps,
+  reports, logs, local secrets). OS- and editor-generated files (e.g. `.DS_Store`)
+  go in `.git/info/exclude` instead — they are personal/local, so they don't belong
+  in a committed ignore file.

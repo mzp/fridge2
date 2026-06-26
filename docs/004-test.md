@@ -22,11 +22,22 @@ building blocks.
   - `test.env` sets a fixed `SESSION_SECRET` so session signing is deterministic.
   - `fridge/**` is excluded — that directory holds the previous implementation and
     must never be run as part of this project's suite.
-- Tests live in `tests/`:
-  - `tests/lib/password.test.ts` — unit tests for scrypt hash/verify.
-  - `tests/auth.test.ts` — integration tests for the login/session/logout flow,
-    driven through `app.request(...)` against a real app instance.
-  - `tests/helpers/db.ts` — builds the test database.
+- Tests live in `tests/`, grouped by kind:
+  - `tests/lib/` — pure unit tests (e.g. `password.test.ts`: scrypt hash/verify).
+  - `tests/routes/` — route/integration tests via `app.request(...)` against a real
+    app instance (e.g. `auth.test.ts`: login/session edge cases).
+  - `tests/e2e/` — Playwright browser tests (`*.spec.ts`), excluded from vitest.
+  - `tests/helpers/` — `db.ts` (PGlite test DB), `e2e.ts` (E2E reset + constants).
+
+## Naming
+
+- **`tests/lib/` and `tests/routes/`** mirror the source file they test: name the
+  test after the module under `src/` (e.g. `src/routes/auth.ts` →
+  `tests/routes/auth.test.ts`, `src/lib/password.ts` → `tests/lib/password.test.ts`).
+  Organized by code structure.
+- **`tests/e2e/`** is named after the URL/page under test, not the source file
+  (e.g. the `/login` flow → `tests/e2e/login.spec.ts`). Organized by what the user
+  visits, since one page may exercise many modules.
 
 ## DB-backed tests run on PGlite
 
@@ -45,3 +56,37 @@ not by pushing `schema.ts` directly. So if you change `schema.ts` but forget to
 and tests fail. That failure is intentional — it catches schema/migration drift
 before it can reach production. See [003-render.md](./003-render.md) for the
 dev-vs-prod DB handling this ties into.
+
+## End-to-end tests (Playwright)
+
+`tests/e2e/*.spec.ts` drive a real browser against the running app. They are **not**
+part of `check`; run them with `npm run e2e` (see [CLAUDE.md](../CLAUDE.md)).
+
+- **Always run in Docker** (the official `mcr.microsoft.com/playwright` image, via
+  the `e2e` service in `docker-compose.yml`). This is what makes visual snapshots
+  reliable: the same Linux image renders pixel-identical screenshots on every
+  machine and in CI, so baselines don't drift by OS. `npm run e2e` wraps
+  `docker compose run`; CI runs the same image as a job container.
+- The app under test is started by Playwright's `webServer` (`scripts/start-e2e.ts`),
+  which uses `.env.test`. That script ensures the `fridge_test` database exists, runs
+  migrations, and seeds the admin. `DATABASE_URL` points at the compose service
+  `postgres`, so it only resolves inside the Docker network.
+- Isolation: `POST /__test__/reset` (enabled only when `NODE_ENV=test`) clears data
+  and re-seeds the admin; specs call it in `beforeEach`.
+
+### Visual regression (design changes)
+
+Specs assert `await expect(page).toHaveScreenshot(...)`. Baselines are committed
+under `tests/e2e/<spec>-snapshots/` (e.g. `login-chromium-linux.png`).
+
+- A change that alters rendering makes the screenshot diff and the test fails.
+- When the change is intentional, regenerate baselines with `npm run e2e:update`
+  and commit the updated PNGs.
+
+**Why we commit the baselines: design review in PRs.** The point isn't only to
+catch accidental regressions — because the baseline PNGs are committed, an
+intentional UI change shows up as an *image diff* in the pull request. Reviewers
+see the before/after of the actual rendered page next to the code, so design
+changes get reviewed alongside the code that caused them. Updating a screenshot is
+a deliberate, visible part of the diff, not a hidden side effect.
+

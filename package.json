@@ -12,6 +12,10 @@
     "format": "biome format --write src tests",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:e2e": "playwright test",
+    "start:e2e": "tsx --env-file=.env.test scripts/start-e2e.ts",
+    "e2e": "docker compose run --rm e2e",
+    "e2e:update": "docker compose run --rm e2e sh -c \"npm ci && npx playwright test --update-snapshots\"",
     "check": "npm run typecheck && npm run lint && npm run test",
     "db:up": "docker compose up -d",
     "db:down": "docker compose down",
@@ -34,6 +38,7 @@
   "devDependencies": {
     "@biomejs/biome": "^2.4.15",
     "@electric-sql/pglite": "^0.2.17",
+    "@playwright/test": "1.60.0",
     "@types/node": "^25.8.0",
     "@types/pg": "^8.11.10",
     "drizzle-kit": "^0.31.10",

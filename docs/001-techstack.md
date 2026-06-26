@@ -15,8 +15,9 @@ Why the stack looks the way it does. For the actual commands, see
 - ORM: Drizzle (`drizzle-orm/node-postgres`); schema diffing and migrations via `drizzle-kit`.
 - Auth: session via signed httpOnly cookie (`hono/jwt`); passwords hashed with
   Node's built-in `crypto.scrypt` (no native dependency). See [002-user.md](./002-user.md).
-- Testing: Vitest. DB-backed tests run against in-memory Postgres (PGlite), so no
-  Docker is needed to run the suite.
+- Testing: Vitest for unit/route tests (DB-backed ones run against in-memory
+  Postgres via PGlite, so no Docker is needed). Playwright for end-to-end + visual
+  regression, run in the official Playwright Docker image. See [004-test.md](./004-test.md).
 - Lint/format: Biome.
 - Hosting: Render (free plan). See [003-render.md](./003-render.md).
 
