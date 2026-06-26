@@ -58,15 +58,12 @@ git status --porcelain db/migrations   # must be empty
 If this prints anything, `src/db/schema.ts` changed without a committed migration.
 Flag it: run `db:generate` and commit `db/migrations/`.
 
-### 3. Test naming conventions
+### 3. Test conventions
 
-- `tests/lib/` and `tests/routes/` mirror the source module name
-  (`src/routes/auth.ts` → `tests/routes/auth.test.ts`).
-- `tests/e2e/` is named after the URL/page under test (`/login` →
-  `tests/e2e/login.spec.ts`), not the source file.
-- Layer split: the happy path belongs in `tests/e2e`; `tests/routes` keeps the
-  fast negative/edge cases. Flag a `tests/routes` test that duplicates a scenario
-  already covered end-to-end.
+If any test files changed, confirm they follow the conventions in
+[`tests/CLAUDE.md`](../../../tests/CLAUDE.md) (naming by source module vs URL, and
+the e2e-vs-routes layer split). That file is the authoritative path-scoped rule;
+flag any deviation.
 
 ### 4. No secrets committed
 
