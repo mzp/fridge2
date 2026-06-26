@@ -40,6 +40,10 @@ are the source of *why*; AGENTS.md is the *commands/procedures* reference.
 | `vitest`/`playwright` config, `tests/` setup | `docs/004-test.md` |
 | new commands or a new workflow phase/area | `AGENTS.md` "Workflows" |
 
+If `package.json` `scripts` changed, verify `docs/005-npm-command.md` is in sync
+(every script documented, no stale entries, descriptions match behavior) — this is
+the path-scoped rule in `.claude/rules/npm-commands.md`.
+
 Also scan AGENTS.md and `docs/` for contradictions with reality:
 - Commands referenced that are not in `package.json` scripts.
 - File paths / directory names mentioned that do not exist on disk.
