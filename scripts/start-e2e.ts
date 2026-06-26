@@ -1,9 +1,11 @@
+import { writeFileSync } from "node:fs";
 import { serve } from "@hono/node-server";
 import { Client } from "pg";
 import { createApp } from "@/app.js";
 import { db } from "@/db/index.js";
 import { runMigrations } from "@/db/migrate.js";
 import { seedAdmin } from "@/db/seed.js";
+import { TEST_LOG_FILE } from "@/logger.js";
 
 // E2E web server. Ensures the test database exists, applies migrations, seeds the
 // admin, then serves the app. Driven by Playwright's `webServer` (see
@@ -27,6 +29,9 @@ async function ensureDatabase(): Promise<void> {
   }
   await admin.end();
 }
+
+// Fresh log per e2e run, so the specs can assert on this run's entries.
+writeFileSync(TEST_LOG_FILE, "");
 
 await ensureDatabase();
 await runMigrations();
