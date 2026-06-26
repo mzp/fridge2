@@ -1,3 +1,4 @@
+import { serveStatic } from "@hono/node-server/serve-static";
 import { Hono } from "hono";
 import { type AppEnv, sessionMiddleware } from "@/auth.js";
 import type { Db } from "@/db/index.js";
@@ -10,6 +11,9 @@ export function createApp(db: Db) {
   const app = new Hono<AppEnv>();
 
   app.get("/health", (c) => c.json({ status: "ok" }));
+  // Compiled Tailwind stylesheet. Before the session middleware — a static asset
+  // needs no session.
+  app.use("/dist.css", serveStatic({ path: "./public/dist.css" }));
 
   app.use("*", sessionMiddleware(db));
   app.route("/", createAuthRoutes(db));

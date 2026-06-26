@@ -13,6 +13,8 @@ Why the stack looks the way it does. For the actual commands, see
 - Language: TypeScript. `tsx` for local dev; production runs compiled JS from `dist/`.
 - Build: `tsc` + `tsc-alias` (rewrites the `@/*` alias to relative paths so plain
   `node` can run the output).
+- CSS: Tailwind v4 via the standalone CLI, compiled to one static stylesheet
+  (no bundler). See [007-tailwind.md](./007-tailwind.md).
 - Database: PostgreSQL (local via Docker Compose, prod via Render Postgres).
 - ORM: Drizzle (`drizzle-orm/node-postgres`); schema diffing and migrations via `drizzle-kit`.
 - Auth: session via signed httpOnly cookie (`hono/jwt`); passwords hashed with
