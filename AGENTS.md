@@ -32,6 +32,7 @@ src/
   lib/
     password.ts   scrypt hash/verify
   mcp/            MCP server (index.ts) + one file per tool (ping.ts); at /mcp
+  oauth/          OAuth 2.1 provider (provider.ts) + Bearer guard (bearer.ts)
   routes/         Hono route modules (auth, home)
   views/          hono/html page templates (layout, login, home)
 public/
