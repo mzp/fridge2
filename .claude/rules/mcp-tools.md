@@ -1,0 +1,14 @@
+---
+description: MCP tools must type and validate their inputs with Zod
+paths:
+  - src/mcp/**
+---
+
+Every MCP tool in `src/mcp/` must define its arguments with a **Zod schema** and
+let the SDK validate them — never accept untyped or unvalidated input.
+
+- Pass the Zod shape to `server.tool(name, description, schema, handler)`.
+- One tool per file, registered via an exported `register<Name>(server[, db])`
+  function that `src/mcp/index.ts` wires into `buildMcpServer`.
+- Describe each field with `.describe(...)` so the schema doubles as the tool's
+  documentation for clients.

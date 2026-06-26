@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import { type AppEnv, requireAuth } from "@/auth.js";
+import { type AppEnv, requireAuth } from "@/middlewares/session.js";
 import { homeView } from "@/views/home.js";
 
 export function createHomeRoutes() {

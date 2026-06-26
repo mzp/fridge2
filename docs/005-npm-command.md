@@ -26,6 +26,7 @@ workflows in [AGENTS.md](../AGENTS.md).
 | `format` | `biome format --write src tests` (apply formatting). |
 | `test` | `vitest run` — unit + route tests once (E2E is separate). See [004-test.md](./004-test.md). |
 | `test:watch` | `vitest` in watch mode for local iteration. |
+| `test:mcp` | `vitest run tests/mcp` — just the MCP OAuth + ping smoke test, over real HTTP. |
 
 ## End-to-end (Playwright, Docker)
 
