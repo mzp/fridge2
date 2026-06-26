@@ -2,7 +2,7 @@
 
 **Status:** Implemented
 
-Why testing is set up the way it is. For the command, see [CLAUDE.md](../CLAUDE.md):
+Why testing is set up the way it is. For the command, see [AGENTS.md](../AGENTS.md):
 `npm run check` runs the whole suite (typecheck → lint → tests) in one shot.
 
 ## What `check` covers
@@ -13,7 +13,7 @@ Why testing is set up the way it is. For the command, see [CLAUDE.md](../CLAUDE.
 2. `lint` — `biome check src tests`.
 3. `test` — `vitest run`.
 
-It stops at the first failure. CLAUDE.md only documents `check` so there is one
+It stops at the first failure. AGENTS.md only documents `check` so there is one
 canonical "is everything OK?" command; the individual scripts still exist as its
 building blocks.
 
@@ -62,7 +62,7 @@ dev-vs-prod DB handling this ties into.
 ## End-to-end tests (Playwright)
 
 `tests/e2e/*.spec.ts` drive a real browser against the running app. They are **not**
-part of `check`; run them with `npm run e2e` (see [CLAUDE.md](../CLAUDE.md)).
+part of `check`; run them with `npm run e2e` (see [AGENTS.md](../AGENTS.md)).
 
 - **Always run in Docker** (the official `mcr.microsoft.com/playwright` image, via
   the `e2e` service in `docker-compose.yml`). This is what makes visual snapshots
