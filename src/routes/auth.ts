@@ -1,9 +1,9 @@
 import { eq } from "drizzle-orm";
 import { Hono } from "hono";
-import { type AppEnv, clearSession, setSession } from "@/auth.js";
 import type { Db } from "@/db/index.js";
 import { users } from "@/db/schema.js";
 import { verifyPassword } from "@/lib/password.js";
+import { type AppEnv, clearSession, setSession } from "@/middlewares/session.js";
 import { loginView } from "@/views/login.js";
 
 /** Only allow same-origin relative paths as post-login redirect targets. */

@@ -9,9 +9,9 @@ import type {
 } from "@modelcontextprotocol/sdk/shared/auth.js";
 import { eq } from "drizzle-orm";
 import type { Context } from "hono";
-import { getSessionUser } from "@/auth.js";
 import type { Db } from "@/db/index.js";
 import { oauthAuthCodes, oauthClients, oauthTokens } from "@/db/schema.js";
+import { getSessionUser } from "@/middlewares/session.js";
 
 const ACCESS_TTL_SECONDS = 60 * 60; // 1 hour
 const REFRESH_TTL_SECONDS = 60 * 60 * 24 * 30; // 30 days

@@ -1,15 +1,19 @@
-import { mcpAuthRouter } from "@hono/mcp/auth";
 import { serveStatic } from "@hono/node-server/serve-static";
 import { Hono } from "hono";
-import { type AppEnv, sessionMiddleware } from "@/auth.js";
 import type { Db } from "@/db/index.js";
 import { users } from "@/db/schema.js";
 import { seedAdmin } from "@/db/seed.js";
 import { mcpHandler } from "@/mcp/index.js";
-import { requireBearer } from "@/oauth/bearer.js";
-import { createOAuthProvider } from "@/oauth/provider.js";
+import { requireBearer } from "@/middlewares/oauth.js";
+import { type AppEnv, sessionMiddleware } from "@/middlewares/session.js";
 import { createAuthRoutes } from "@/routes/auth.js";
 import { createHomeRoutes } from "@/routes/home.js";
+import {
+  createOAuthProvider,
+  createOAuthRoutes,
+  createWellKnownRoutes,
+  type OAuthConfig,
+} from "@/routes/oauth/index.js";
 
 /**
  * Absolute base URL used as the OAuth issuer and in discovery metadata. Must be
@@ -31,20 +35,13 @@ export function createApp(db: Db) {
   // needs no session.
   app.use("/dist.css", serveStatic({ path: "./public/dist.css" }));
 
-  // OAuth authorization server: discovery metadata, dynamic client registration,
-  // /authorize, /token, /revoke. The provider reuses the login session at
-  // /authorize. Mounted before the web session middleware (these are API/token
-  // endpoints, not cookie-session pages).
+  // OAuth authorization server. The provider reuses the login session at
+  // /authorize; discovery metadata is served at the well-known root, the operation
+  // endpoints under /oauth. Config (issuer, name, scopes) is owned here.
   const provider = createOAuthProvider(db);
-  app.route(
-    "/",
-    mcpAuthRouter({
-      provider,
-      issuerUrl: new URL(baseUrl),
-      scopesSupported: ["mcp"],
-      resourceName: "Fridge MCP",
-    }),
-  );
+  const oauth: OAuthConfig = { baseUrl, resourceName: "Fridge MCP", scopes: ["mcp"] };
+  app.route("/", createWellKnownRoutes(provider, oauth));
+  app.route("/oauth", createOAuthRoutes(provider));
 
   // MCP over Streamable HTTP, protected by a Bearer access token.
   app.use("/mcp", requireBearer(provider, `${baseUrl}/.well-known/oauth-protected-resource`));

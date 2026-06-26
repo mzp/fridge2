@@ -23,7 +23,6 @@ Run npm commands through `volta run` so the pinned Node.js version is used.
 src/
   index.ts        Server entrypoint (in prod: migrate + seed admin, then start Hono)
   app.ts          App assembly and route mounting
-  auth.ts         Session cookie + auth middleware (sessionMiddleware, requireAuth)
   db/
     schema.ts     Drizzle schema
     index.ts      DB connection (reads DATABASE_URL)
@@ -32,8 +31,9 @@ src/
   lib/
     password.ts   scrypt hash/verify
   mcp/            MCP server (index.ts) + one file per tool (ping.ts); at /mcp
-  oauth/          OAuth 2.1 provider (provider.ts) + Bearer guard (bearer.ts)
-  routes/         Hono route modules (auth, home)
+  middlewares/    Auth middleware: session.ts (web cookie login), oauth.ts (Bearer guard)
+  routes/         Hono route modules: auth, home, oauth/ (OAuth AS at /oauth +
+                  provider; well-known discovery served at root)
   views/          hono/html page templates (layout, login, home)
 public/
   style.css       Tailwind source (committed); dist.css is the gitignored build

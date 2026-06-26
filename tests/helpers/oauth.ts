@@ -6,10 +6,20 @@ const base64url = (buf: Buffer) => buf.toString("base64url");
  * Drive the full OAuth flow against a running server and return an access token:
  * login → dynamic client registration → authorize (with the session) → token.
  */
+interface AuthServerMetadata {
+  authorization_endpoint: string;
+  token_endpoint: string;
+  registration_endpoint: string;
+}
+
 export async function getAccessToken(
   baseUrl: string,
   creds: { name: string; password: string },
 ): Promise<string> {
+  // 0. Discover the OAuth endpoints from the well-known metadata.
+  const discovery = await fetch(`${baseUrl}/.well-known/oauth-authorization-server`);
+  const meta = (await discovery.json()) as AuthServerMetadata;
+
   // 1. Log in for a session cookie.
   const login = await fetch(`${baseUrl}/login`, {
     method: "POST",
@@ -20,7 +30,7 @@ export async function getAccessToken(
   const cookie = (login.headers.get("set-cookie") ?? "").split(";")[0] ?? "";
 
   // 2. Register a public client (RFC 7591).
-  const reg = await fetch(`${baseUrl}/register`, {
+  const reg = await fetch(meta.registration_endpoint, {
     method: "POST",
     headers: { "content-type": "application/json" },
     body: JSON.stringify({
@@ -37,7 +47,7 @@ export async function getAccessToken(
   const challenge = base64url(createHash("sha256").update(verifier).digest());
 
   // 4. Authorize with the session cookie; grab the code from the redirect.
-  const authorize = new URL(`${baseUrl}/authorize`);
+  const authorize = new URL(meta.authorization_endpoint);
   authorize.search = new URLSearchParams({
     response_type: "code",
     client_id: client.client_id,
@@ -58,7 +68,7 @@ export async function getAccessToken(
   }
 
   // 5. Exchange the code for tokens.
-  const token = await fetch(`${baseUrl}/token`, {
+  const token = await fetch(meta.token_endpoint, {
     method: "POST",
     headers: { "content-type": "application/x-www-form-urlencoded" },
     body: new URLSearchParams({
