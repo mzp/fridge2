@@ -16,6 +16,7 @@ Rules for files under `tests/`. (Why testing is set up this way:
 
 ## Layers
 
-- The happy path belongs in `tests/e2e` (Playwright).
+- The happy path belongs in `tests/e2e` (browser flows) or `tests/mcp` (MCP flows
+  over HTTP) — whichever interface owns it.
 - `tests/routes` (vitest) keeps the fast negative/edge cases. Don't duplicate a
-  scenario already covered end-to-end.
+  scenario already covered by an e2e or mcp test.

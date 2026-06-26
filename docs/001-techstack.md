@@ -15,6 +15,8 @@ Why the stack looks the way it does. For the actual commands, see
   `node` can run the output).
 - CSS: Tailwind v4 via the standalone CLI, compiled to one static stylesheet
   (no bundler). See [007-tailwind.md](./007-tailwind.md).
+- Logging: Pino — structured JSON to stdout (captured by Render); pretty-printed
+  in local dev. A request-logging middleware records method/path/status/duration.
 - Database: PostgreSQL (local via Docker Compose, prod via Render Postgres).
 - ORM: Drizzle (`drizzle-orm/node-postgres`); schema diffing and migrations via `drizzle-kit`.
 - Auth: session via signed httpOnly cookie (`hono/jwt`); passwords hashed with

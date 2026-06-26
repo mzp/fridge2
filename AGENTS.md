@@ -23,6 +23,7 @@ Run npm commands through `volta run` so the pinned Node.js version is used.
 src/
   index.ts        Server entrypoint (in prod: migrate + seed admin, then start Hono)
   app.ts          App assembly and route mounting
+  logger.ts       Pino logger (JSON to stdout; pretty in dev)
   db/
     schema.ts     Drizzle schema
     index.ts      DB connection (reads DATABASE_URL)
@@ -31,7 +32,7 @@ src/
   lib/
     password.ts   scrypt hash/verify
   mcp/            MCP server (index.ts) + one file per tool (ping.ts); at /mcp
-  middlewares/    Auth middleware: session.ts (web cookie login), oauth.ts (Bearer guard)
+  middlewares/    session.ts (web cookie login), oauth.ts (Bearer guard), logger.ts (request log)
   routes/         Hono route modules: auth, home, oauth/ (OAuth AS at /oauth +
                   provider; well-known discovery served at root)
   views/          hono/html page templates (layout, login, home)
