@@ -1,0 +1,41 @@
+@import "tailwindcss";
+
+/*
+ * Semantic component classes. Keep raw utility classes (especially colors) out of
+ * the markup — the palette (emerald primary, red danger, gray muted) lives here, so
+ * a restyle is one file. See docs/007-tailwind.md.
+ */
+@layer components {
+  .page {
+    @apply max-w-lg mx-auto px-4 py-8;
+  }
+  .page-title {
+    @apply text-2xl font-bold text-emerald-600 mb-6;
+  }
+
+  .form {
+    @apply flex flex-col gap-4;
+  }
+  .field {
+    @apply flex flex-col gap-1 text-sm font-medium text-gray-700;
+  }
+  .form-input {
+    @apply rounded border border-gray-300 px-3 py-2 text-base text-gray-900 focus:border-emerald-500 focus:outline-none;
+  }
+  .form-error {
+    @apply rounded border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-700;
+  }
+
+  .btn {
+    @apply inline-flex items-center justify-center rounded border font-medium transition-colors;
+  }
+  .btn-md {
+    @apply px-4 py-2;
+  }
+  .btn-primary {
+    @apply border-emerald-600 bg-emerald-600 text-white hover:border-emerald-700 hover:bg-emerald-700;
+  }
+  .btn-secondary {
+    @apply border-gray-300 bg-white text-gray-700 hover:bg-gray-50;
+  }
+}

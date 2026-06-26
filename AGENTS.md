@@ -32,6 +32,9 @@ src/
   lib/
     password.ts   scrypt hash/verify
   routes/         Hono route modules (auth, home)
+  views/          hono/html page templates (layout, login, home)
+public/
+  style.css       Tailwind source (committed); dist.css is the gitignored build
 db/
   migrations/     drizzle-kit migrations (committed; the source of truth for prod)
 scripts/
@@ -78,6 +81,14 @@ added here).
 volta run npm run db:push     # apply the new shape to the dev DB (incl. drops)
 volta run npm run db:reset    # or rebuild a clean dev DB: drop + push + seed
 volta run npm run db:seed     # seed admin only (from SEED_ADMIN_* in .env)
+```
+
+**UI** — markup lives in `src/views/`; styles are semantic classes in
+`public/style.css` (see [docs/007-tailwind.md](./docs/007-tailwind.md)). `dev`/`build`
+compile the CSS automatically; while iterating on classes:
+
+```bash
+volta run npm run css:watch   # rebuild public/dist.css on change
 ```
 
 ### Test

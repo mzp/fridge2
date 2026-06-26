@@ -11,11 +11,8 @@ export default defineConfig({
   retries: isCI ? 1 : 0,
   workers: 1,
   reporter: isCI ? [["list"], ["html", { open: "never" }]] : "list",
-  // Screenshots render identically everywhere because e2e always runs in the
-  // Playwright Docker image (Linux). A tiny tolerance absorbs antialiasing noise.
-  expect: {
-    toHaveScreenshot: { maxDiffPixelRatio: 0.01 },
-  },
+  // No pixel tolerance: e2e always runs in the same Playwright Docker image, so
+  // rendering is deterministic and even small UI changes should fail the snapshot.
   use: {
     baseURL,
     trace: "on-first-retry",

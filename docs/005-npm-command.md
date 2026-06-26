@@ -10,9 +10,11 @@ workflows in [AGENTS.md](../AGENTS.md).
 
 | Command | What it does |
 |---|---|
-| `dev` | Start the dev server with `tsx watch` on `:3000`. Loads `.env` if present. Does **not** auto-migrate or seed (that is production-only). |
-| `build` | Compile TypeScript to `dist/` via `tsc`, then `tsc-alias` to rewrite the `@/*` alias to relative paths so plain `node` can run it. |
+| `dev` | Build the CSS, then start the dev server with `tsx watch` on `:3000`. Loads `.env` if present. Does **not** auto-migrate or seed (that is production-only). |
+| `build` | Build the CSS, then compile TypeScript to `dist/` via `tsc` + `tsc-alias` (rewrites the `@/*` alias so plain `node` can run it). |
 | `start` | Run the compiled app: `node dist/index.js`. This is what production runs; on boot it migrates + seeds when `NODE_ENV=production`. Loads `.env` if present. |
+| `css:build` | Compile `public/style.css` → `public/dist.css` with the Tailwind CLI. Wired into `dev`/`build`/`start:e2e`. See [007-tailwind.md](./007-tailwind.md). |
+| `css:watch` | Same as `css:build` with `--watch`, for iterating on classes in dev. |
 
 ## Quality
 

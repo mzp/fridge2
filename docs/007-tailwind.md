@@ -1,9 +1,8 @@
 # 007 — Tailwind CSS
 
-**Status:** Not implemented
+**Status:** Implemented
 
-How styling is intended to work and why it is wired this way. This is the design
-direction, not yet built. Once it lands, its commands will move into the Develop
+How styling works and why it is wired this way. Commands live in the Develop/UI
 workflow in [AGENTS.md](../AGENTS.md).
 
 ## Approach
