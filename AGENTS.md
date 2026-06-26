@@ -10,6 +10,7 @@ these choices lives in `docs/`:
 - [docs/004-test.md](./docs/004-test.md) — testing setup (why).
 - [docs/005-npm-command.md](./docs/005-npm-command.md) — every npm script, explained.
 - [docs/006-mcp.md](./docs/006-mcp.md) — MCP over OAuth (planned).
+- [docs/007-tailwind.md](./docs/007-tailwind.md) — Tailwind CSS setup & semantic classes (planned).
 
 Each doc starts with a **Status**: `Implemented`, `Not implemented` (planned), or
 `Rejected` (considered, decided against).
