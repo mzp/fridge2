@@ -20,8 +20,20 @@ workflows in [CLAUDE.md](../CLAUDE.md).
 | `typecheck` | `tsc --noEmit` over `src` and `tests`. |
 | `lint` | `biome check src tests` (lint + import/format checks, no writes). |
 | `format` | `biome format --write src tests` (apply formatting). |
-| `test` | `vitest run` — the full test suite once. See [004-test.md](./004-test.md). |
+| `test` | `vitest run` — unit + route tests once (E2E is separate). See [004-test.md](./004-test.md). |
 | `test:watch` | `vitest` in watch mode for local iteration. |
+
+## End-to-end (Playwright, Docker)
+
+E2E always runs in the official Playwright Docker image for deterministic
+screenshots. See [004-test.md](./004-test.md).
+
+| Command | What it does |
+|---|---|
+| `e2e` | Run the E2E suite in the Playwright Docker image: `docker compose run --rm e2e`. Needs `db:up`. |
+| `e2e:update` | Same, but regenerate screenshot baselines (`--update-snapshots`). Run after an intended UI change, then commit the PNGs. |
+| `test:e2e` | `playwright test` — the runner itself. Invoked **inside** the Docker container / CI, not directly on the host. |
+| `start:e2e` | Boots the app for E2E (`scripts/start-e2e.ts` with `.env.test`): ensures `fridge_test`, migrates, seeds. Launched by Playwright's `webServer`, not run directly. |
 
 ## Database
 

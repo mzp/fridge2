@@ -119,6 +119,17 @@ volta run npm run check       # confirm everything passes against the migration
 > of truth production applies on boot. Why this dev-vs-prod split exists:
 > [docs/003-render.md](./docs/003-render.md).
 
+**UI** — if the change alters how a page renders, refresh the screenshot baselines:
+
+```bash
+volta run npm run e2e:update  # regenerate screenshot baselines (Docker/Linux)
+volta run npm run e2e         # confirm they pass
+# commit the updated tests/e2e/**-snapshots/*.png with the change
+```
+
+> Commit the updated baselines so the UI change appears as an image diff in the PR
+> for review. Why we do this: [docs/004-test.md](./docs/004-test.md).
+
 ### Deploy
 
 Deploys are automatic: merging to `main` triggers Render to rebuild and, on boot,

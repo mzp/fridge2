@@ -29,6 +29,16 @@ building blocks.
   - `tests/e2e/` — Playwright browser tests (`*.spec.ts`), excluded from vitest.
   - `tests/helpers/` — `db.ts` (PGlite test DB), `e2e.ts` (E2E reset + constants).
 
+## Naming
+
+- **`tests/lib/` and `tests/routes/`** mirror the source file they test: name the
+  test after the module under `src/` (e.g. `src/routes/auth.ts` →
+  `tests/routes/auth.test.ts`, `src/lib/password.ts` → `tests/lib/password.test.ts`).
+  Organized by code structure.
+- **`tests/e2e/`** is named after the URL/page under test, not the source file
+  (e.g. the `/login` flow → `tests/e2e/login.spec.ts`). Organized by what the user
+  visits, since one page may exercise many modules.
+
 ## DB-backed tests run on PGlite
 
 `createTestDb()` (`tests/helpers/db.ts`) spins up an **in-memory Postgres (PGlite)**
@@ -72,4 +82,11 @@ under `tests/e2e/<spec>-snapshots/` (e.g. `login-chromium-linux.png`).
 - A change that alters rendering makes the screenshot diff and the test fails.
 - When the change is intentional, regenerate baselines with `npm run e2e:update`
   and commit the updated PNGs.
+
+**Why we commit the baselines: design review in PRs.** The point isn't only to
+catch accidental regressions — because the baseline PNGs are committed, an
+intentional UI change shows up as an *image diff* in the pull request. Reviewers
+see the before/after of the actual rendered page next to the code, so design
+changes get reviewed alongside the code that caused them. Updating a screenshot is
+a deliberate, visible part of the diff, not a hidden side effect.
 
