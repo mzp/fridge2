@@ -3,6 +3,11 @@ dist/
 logs/
 *.log
 
+# Playwright outputs (snapshot baselines under tests/e2e/**-snapshots/ ARE committed)
+playwright-report/
+test-results/
+blob-report/
+
 # Env files (real secrets live here; .env.example is committed instead)
 .env
 .env.local

@@ -4,6 +4,10 @@ import { createApp } from "@/app.js";
 import { users } from "@/db/schema.js";
 import { hashPassword } from "@/lib/password.js";
 
+// The happy path (login → home → logout, rendered in a browser) is covered by
+// tests/e2e/auth.spec.ts. These route tests focus on the fast negative/edge cases
+// and the response details (status codes, cookie flags) that E2E can't easily see.
+
 const NAME = "admin";
 const PASSWORD = "correct horse";
 
@@ -21,16 +25,7 @@ function loginRequest(name: string, password: string) {
   });
 }
 
-/** Pull the bare `session=...` pair out of a Set-Cookie header for reuse. */
-function sessionCookie(res: Response): string {
-  const setCookie = res.headers.get("set-cookie");
-  if (!setCookie) {
-    throw new Error("expected a Set-Cookie header");
-  }
-  return setCookie.split(";")[0] ?? "";
-}
-
-describe("authentication", () => {
+describe("auth routes", () => {
   let app: Awaited<ReturnType<typeof setup>>;
 
   beforeEach(async () => {
@@ -60,20 +55,11 @@ describe("authentication", () => {
     expect(res.status).toBe(401);
   });
 
-  it("logs in with valid credentials and sets a session cookie", async () => {
+  it("logs in with valid credentials and sets an httpOnly session cookie", async () => {
     const res = await app.request(loginRequest(NAME, PASSWORD));
     expect(res.status).toBe(302);
     expect(res.headers.get("location")).toBe("/");
     expect(res.headers.get("set-cookie")).toMatch(/session=.+HttpOnly/i);
-  });
-
-  it("serves the home page once authenticated", async () => {
-    const login = await app.request(loginRequest(NAME, PASSWORD));
-    const res = await app.request("/", {
-      headers: { cookie: sessionCookie(login) },
-    });
-    expect(res.status).toBe(200);
-    expect(await res.text()).toContain("Hello, admin!");
   });
 
   it("ignores a tampered session cookie", async () => {
@@ -82,16 +68,5 @@ describe("authentication", () => {
     });
     expect(res.status).toBe(302);
     expect(res.headers.get("location")).toBe("/login");
-  });
-
-  it("logs out by clearing the session cookie", async () => {
-    const login = await app.request(loginRequest(NAME, PASSWORD));
-    const res = await app.request("/logout", {
-      method: "POST",
-      headers: { cookie: sessionCookie(login) },
-    });
-    expect(res.status).toBe(302);
-    expect(res.headers.get("location")).toBe("/login");
-    expect(res.headers.get("set-cookie")).toMatch(/session=;|Max-Age=0/i);
   });
 });

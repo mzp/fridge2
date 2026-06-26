@@ -16,5 +16,26 @@ services:
       timeout: 5s
       retries: 5
 
+  # Dockerized Playwright E2E runner. Runs in the official Playwright image so
+  # screenshots render identically on every machine (Linux baselines). Only starts
+  # when explicitly invoked (profile), e.g. `npm run e2e`.
+  e2e:
+    image: mcr.microsoft.com/playwright:v1.60.0-noble
+    profiles: ["e2e"]
+    working_dir: /app
+    environment:
+      CI: "true"
+    env_file:
+      - .env.test
+    volumes:
+      - .:/app
+      # Keep the container's own node_modules (host's are macOS-native binaries).
+      - e2e_node_modules:/app/node_modules
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: sh -c "npm ci && npx playwright test"
+
 volumes:
   pgdata:
+  e2e_node_modules:

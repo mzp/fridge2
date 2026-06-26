@@ -8,7 +8,8 @@ export default defineConfig({
     env: {
       SESSION_SECRET: "test-secret",
     },
-    // `fridge/` holds the previous implementation (its own repo); never test it.
-    exclude: ["**/node_modules/**", "**/dist/**", "fridge/**"],
+    // `tests/e2e/` is Playwright's (different runner). `fridge/` holds the previous
+    // implementation (its own repo); never run either under vitest.
+    exclude: ["**/node_modules/**", "**/dist/**", "tests/e2e/**", "fridge/**"],
   },
 });
