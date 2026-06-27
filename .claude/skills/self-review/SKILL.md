@@ -1,6 +1,6 @@
 ---
 name: self-review
-description: Pre-PR self-review for fridge. Verify docs and AGENTS.md are up to date with the change, the DB migration is generated (no schema drift), test files follow the naming conventions, and no secrets are committed. Use before opening a pull request.
+description: Pre-PR self-review for fridge. Verify docs and CLAUDE.md are up to date with the change, the DB migration is generated (no schema drift), test files follow the naming conventions, and no secrets are committed. Use before opening a pull request.
 ---
 
 # Self Review
@@ -10,7 +10,7 @@ then report a checklist with concrete fixes.
 
 This is a review, not a test runner — it inspects the change and reports. It does
 not run the e2e suite; visual snapshots are covered by CI and the Finalize workflow
-in AGENTS.md. The one command it runs is `db:generate` (to detect schema drift), so
+in CLAUDE.md. The one command it runs is `db:generate` (to detect schema drift), so
 local Postgres should be up (`volta run npm run db:up`).
 
 ## Scope
@@ -25,26 +25,26 @@ git status --short                         # uncommitted/untracked
 
 ## Checks
 
-### 1. Docs & AGENTS.md are up to date
+### 1. Docs & CLAUDE.md are up to date
 
 For each area the change touches, confirm the matching doc was updated. The docs
-are the source of *why*; AGENTS.md is the *commands/procedures* reference.
+are the source of *why*; CLAUDE.md is the *commands/procedures* reference.
 
 | Changed | Update |
 |---|---|
 | `package.json` scripts | `docs/005-npm-command.md` |
-| `src/` files / new modules / moved files | `AGENTS.md` "Repository Layout" |
+| `src/` files / new modules / moved files | `CLAUDE.md` "Repository Layout" |
 | deps / tooling / tech choices | `docs/001-techstack.md` |
 | auth, users, `src/db/schema.ts` (users), sessions | `docs/002-user.md` |
 | `render.yaml`, deploy, env vars, DB dev-vs-prod lifecycle | `docs/003-render.md` |
 | `vitest`/`playwright` config, `tests/` setup | `docs/004-test.md` |
-| new commands or a new workflow phase/area | `AGENTS.md` "Workflows" |
+| new commands or a new workflow phase/area | `CLAUDE.md` "Workflows" |
 
 If `package.json` `scripts` changed, verify `docs/005-npm-command.md` is in sync
 (every script documented, no stale entries, descriptions match behavior) — this is
 the path-scoped rule in `.claude/rules/npm-commands.md`.
 
-Also scan AGENTS.md and `docs/` for contradictions with reality:
+Also scan CLAUDE.md and `docs/` for contradictions with reality:
 - Commands referenced that are not in `package.json` scripts.
 - File paths / directory names mentioned that do not exist on disk.
 - Tech-stack or env-var claims that contradict `package.json` / `render.yaml`.
@@ -65,7 +65,7 @@ Flag it: run `db:generate` and commit `db/migrations/`.
 ### 3. Test conventions
 
 If any test files changed, confirm they follow the conventions in
-[`tests/AGENTS.md`](../../../tests/AGENTS.md) (naming by source module vs URL, and
+[`tests/CLAUDE.md`](../../../tests/CLAUDE.md) (naming by source module vs URL, and
 the e2e-vs-routes layer split). That file is the authoritative path-scoped rule;
 flag any deviation.
 

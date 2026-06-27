@@ -3,7 +3,7 @@
 **Status:** Implemented
 
 Why the stack looks the way it does. For the actual commands, see
-[AGENTS.md](../AGENTS.md).
+[CLAUDE.md](../CLAUDE.md).
 
 ## Stack
 
@@ -27,7 +27,7 @@ Why the stack looks the way it does. For the actual commands, see
 - Lint/format: Biome.
 - Hosting: Render (free plan). See [003-render.md](./003-render.md).
 
-The repository layout is documented in [AGENTS.md](../AGENTS.md).
+The repository layout is documented in [CLAUDE.md](../CLAUDE.md).
 
 ## Notable choices
 

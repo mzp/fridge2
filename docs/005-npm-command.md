@@ -4,7 +4,7 @@
 
 Reference for every npm script. Run them through `volta run` so the pinned Node.js
 version is used (e.g. `volta run npm run dev`). For *when* to use them, see the
-workflows in [AGENTS.md](../AGENTS.md).
+workflows in [CLAUDE.md](../CLAUDE.md).
 
 ## App
 
