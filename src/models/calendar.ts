@@ -66,6 +66,30 @@ export function buildCalendar(year: number, month: number): Calendar {
 }
 
 /**
+ * Parse a `YYYY-MM-DD` value into a local Date, or return `fallback` when it is
+ * missing or malformed. Lets the calendar route accept `?date=` for a stable,
+ * testable reference day instead of always using the wall clock.
+ */
+export function parseDate(value: string | null | undefined, fallback: Date): Date {
+  if (!value) {
+    return fallback;
+  }
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+  if (!match) {
+    return fallback;
+  }
+  const year = Number(match[1]);
+  const month = Number(match[2]) - 1;
+  const day = Number(match[3]);
+  const date = new Date(year, month, day);
+  // Reject overflow (e.g. 2026-13-40, 2026-02-30 — JS Date would roll these over).
+  if (date.getFullYear() !== year || date.getMonth() !== month || date.getDate() !== day) {
+    return fallback;
+  }
+  return date;
+}
+
+/**
  * Annotate a calendar with today: a cell is today only when `today` falls in the
  * calendar's own month (in-month cells, never the adjacent-month padding).
  */

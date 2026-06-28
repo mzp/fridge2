@@ -23,6 +23,12 @@ test("logs in, lands on the calendar, then logs out", async ({ page }) => {
   await expect(page).toHaveURL("/calendar");
   await expect(page.getByText("Sun")).toBeVisible();
 
+  // Snapshot a fixed month (?date=) so the baseline is stable regardless of the
+  // date the test runs on.
+  await page.goto("/calendar?date=2026-06-15");
+  await expect(page.getByRole("heading", { name: "June 2026" })).toBeVisible();
+  await expect(page).toHaveScreenshot("calendar.png");
+
   await page.getByRole("button", { name: "Sign out" }).click();
   await expect(page).toHaveURL("/login");
 });

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildCalendar, markToday } from "@/models/calendar.js";
+import { buildCalendar, markToday, parseDate } from "@/models/calendar.js";
 
 describe("buildCalendar", () => {
   it("pads to whole weeks (every week has 7 days)", () => {
@@ -19,6 +19,32 @@ describe("buildCalendar", () => {
   it("handles a leap-year February with 29 days", () => {
     const cal = buildCalendar(2024, 1);
     expect(cal.weeks.flat().filter((d) => d.inMonth)).toHaveLength(29);
+  });
+});
+
+describe("parseDate", () => {
+  const fallback = new Date(2026, 5, 27);
+
+  it("parses a valid YYYY-MM-DD into a local date", () => {
+    const d = parseDate("2026-06-15", fallback);
+    expect([d.getFullYear(), d.getMonth(), d.getDate()]).toEqual([2026, 5, 15]);
+  });
+
+  it("falls back when the value is missing", () => {
+    expect(parseDate(undefined, fallback)).toBe(fallback);
+    expect(parseDate(null, fallback)).toBe(fallback);
+    expect(parseDate("", fallback)).toBe(fallback);
+  });
+
+  it("falls back on malformed input", () => {
+    expect(parseDate("2026/06/15", fallback)).toBe(fallback);
+    expect(parseDate("June 15", fallback)).toBe(fallback);
+    expect(parseDate("2026-6-5", fallback)).toBe(fallback);
+  });
+
+  it("falls back on out-of-range dates instead of rolling them over", () => {
+    expect(parseDate("2026-13-01", fallback)).toBe(fallback);
+    expect(parseDate("2026-02-30", fallback)).toBe(fallback);
   });
 });
 
