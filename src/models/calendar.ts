@@ -48,6 +48,7 @@ export class Calendar {
  * drives styling — today is just an event of kind `"today"`; meals and the like
  * will be further kinds. Single-day items have `start` equal to `end`. `label` is
  * the text shown on a span bar; `kind` also picks the bar's colour (one per kind).
+ * `href` makes the bar link to the event's read view.
  *
  * Placing events into week rows and lanes is a rendering concern — see
  * `src/views/helpers/week-layout.ts`.
@@ -57,4 +58,5 @@ export interface CalendarEvent {
   end: Date;
   kind: string;
   label?: string;
+  href?: string;
 }

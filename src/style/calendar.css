@@ -54,6 +54,10 @@
     @apply mx-0.5 truncate rounded bg-line px-1 text-xs leading-5 text-ink;
   }
 
+  .calendar-bar-link {
+    @apply pointer-events-auto focus:outline-2 focus:outline-primary;
+  }
+
   /* One colour per event kind (theme tokens). Pantry now; meals etc. get their own. */
   .calendar-bar-pantry {
     @apply bg-pantry/10 text-pantry;

@@ -30,12 +30,25 @@ test("creates, edits, and deletes a pantry item", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "Edit pantry item" })).toBeVisible();
   await expect(page).toHaveScreenshot("pantry-edit.png");
   await page.getByLabel("Name").fill("brown rice");
-  await page.getByLabel("Status").selectOption("consumed");
   await page.getByRole("button", { name: "Save changes" }).click();
   await expect(page.getByRole("heading", { name: "brown rice" })).toBeVisible();
   const updatedItem = page.getByRole("article").filter({ hasText: "brown rice" });
+  await updatedItem.getByRole("button", { name: "Mark as consumed" }).click();
   await expect(updatedItem.getByText("Consumed")).toBeVisible();
 
   await updatedItem.getByRole("button", { name: "Delete" }).click();
   await expect(page.getByRole("heading", { name: "brown rice" })).toHaveCount(0);
+});
+
+test("opens a pantry item from its calendar event", async ({ page }) => {
+  await page.goto("/calendar?date=2026-06-15");
+  await page.getByRole("link", { name: "milk" }).click();
+
+  await expect(page).toHaveURL(/\/pantry\/[0-9a-f-]+\?return=/);
+  await expect(page.getByRole("heading", { name: "milk" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Back to calendar" })).toBeVisible();
+  await expect(page).toHaveScreenshot("pantry-detail.png");
+
+  await page.getByRole("link", { name: "Back to calendar" }).click();
+  await expect(page).toHaveURL("/calendar?date=2026-06-15");
 });

@@ -35,6 +35,7 @@ describe("PantryItem.toCalendarEvent", () => {
       end: new Date(2026, 5, 20),
       kind: "pantry",
       label: "milk",
+      href: "/pantry/00000000-0000-0000-0000-000000000001",
     });
   });
 
@@ -86,12 +87,16 @@ describe("PantryItem persistence", () => {
       name: "brown rice",
       stockDate: null,
       bestBeforeDays: null,
-      status: "consumed",
+      status: "in_stock",
     });
     expect(updated?.row).toMatchObject({
       name: "brown rice",
       stockDate: null,
       bestBeforeDays: null,
+      status: "in_stock",
+    });
+    expect(await PantryItem.consume(db, user.id, created.row.id)).toBe(true);
+    expect((await PantryItem.find(db, user.id, created.row.id))?.row).toMatchObject({
       status: "consumed",
     });
 
@@ -123,6 +128,7 @@ describe("PantryItem persistence", () => {
     expect(await PantryItem.find(db, other.id, item.row.id)).toBeNull();
     expect(await PantryItem.update(db, other.id, item.row.id, replacement)).toBeNull();
     expect(await PantryItem.delete(db, other.id, item.row.id)).toBe(false);
+    expect(await PantryItem.consume(db, other.id, item.row.id)).toBe(false);
     expect(await PantryItem.find(db, owner.id, "not-a-uuid")).toBeNull();
     expect(await PantryItem.update(db, owner.id, "not-a-uuid", replacement)).toBeNull();
     expect(await PantryItem.delete(db, owner.id, "not-a-uuid")).toBe(false);

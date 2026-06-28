@@ -101,12 +101,21 @@ describe("pantry routes", () => {
     const edit = await context.app.request(`/pantry/${item.id}/edit`, {
       headers: { cookie: context.cookie },
     });
+    const show = await context.app.request(`/pantry/${item.id}`, {
+      headers: { cookie: context.cookie },
+    });
     const remove = await context.app.request(`/pantry/${item.id}/delete`, {
       method: "POST",
       headers: { cookie: context.cookie },
     });
+    const consume = await context.app.request(`/pantry/${item.id}/consume`, {
+      method: "POST",
+      headers: { cookie: context.cookie },
+    });
     expect(edit.status).toBe(404);
+    expect(show.status).toBe(404);
     expect(remove.status).toBe(404);
+    expect(consume.status).toBe(404);
   });
 
   it("creates, displays, updates, and deletes an item", async () => {
@@ -127,6 +136,18 @@ describe("pantry routes", () => {
       headers: { cookie: context.cookie },
     });
     expect(await list.text()).toContain("2026-07-20");
+    const show = await context.app.request(`/pantry/${id}`, {
+      headers: { cookie: context.cookie },
+    });
+    expect(show.status).toBe(200);
+    expect(await show.text()).toContain("rice");
+    const fromCalendar = await context.app.request(
+      `/pantry/${id}?return=${encodeURIComponent("/calendar?date=2026-06-15")}`,
+      { headers: { cookie: context.cookie } },
+    );
+    const fromCalendarBody = await fromCalendar.text();
+    expect(fromCalendarBody).toContain("Back to calendar");
+    expect(fromCalendarBody).toContain('href="/calendar?date=2026-06-15"');
 
     const update = await context.app.request(
       `/pantry/${id}`,
@@ -150,5 +171,25 @@ describe("pantry routes", () => {
     expect(await context.db.query.pantryItems.findFirst({ where: eq(pantryItems.id, id) })).toBe(
       undefined,
     );
+  });
+
+  it("marks an owned item as consumed", async () => {
+    const [item] = await context.db
+      .insert(pantryItems)
+      .values({ userId: context.user.id, name: "milk" })
+      .returning();
+    if (!item) {
+      throw new Error("failed to seed pantry item");
+    }
+
+    const consume = await context.app.request(`/pantry/${item.id}/consume`, {
+      method: "POST",
+      headers: { cookie: context.cookie },
+    });
+    expect(consume.status).toBe(303);
+    expect(consume.headers.get("location")).toBe("/pantry");
+    expect(
+      await context.db.query.pantryItems.findFirst({ where: eq(pantryItems.id, item.id) }),
+    ).toMatchObject({ status: "consumed" });
   });
 });

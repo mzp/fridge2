@@ -11,6 +11,29 @@ function statusClass(status: PantryStatus): string {
   return status === "in_stock" ? "pantry-status-in-stock" : "pantry-status-consumed";
 }
 
+function statusBadge(item: PantryItem) {
+  const status = item.row.status as PantryStatus;
+  return html`<span class="pantry-status ${statusClass(status)}">${statusLabel(status)}</span>`;
+}
+
+function itemDetails(item: PantryItem) {
+  const expiry = item.expiryDate();
+  return html`<dl class="pantry-details">
+    <div>
+      <dt>Stock date</dt>
+      <dd>${item.row.stockDate ?? "Not set"}</dd>
+    </div>
+    <div>
+      <dt>Best before</dt>
+      <dd>${item.row.bestBeforeDays == null ? "Not set" : `${item.row.bestBeforeDays} days`}</dd>
+    </div>
+    <div>
+      <dt>Expiry</dt>
+      <dd>${expiry?.toString() ?? "Not tracked"}</dd>
+    </div>
+  </dl>`;
+}
+
 export function pantryListView(user: User, items: PantryItem[]) {
   const body = html`<section class="pantry">
     <div class="page-heading">
@@ -22,36 +45,25 @@ export function pantryListView(user: User, items: PantryItem[]) {
         ? html`<p class="empty-state">Your pantry is empty.</p>`
         : html`<div class="pantry-list">
           ${items.map((item) => {
-            const expiry = item.expiryDate();
             return html`<article class="pantry-item">
               <div class="pantry-item-main">
-                <h2 class="pantry-item-name">${item.row.name}</h2>
-                <span class="pantry-status ${statusClass(item.row.status as PantryStatus)}">
-                  ${statusLabel(item.row.status as PantryStatus)}
-                </span>
+                <h2 class="pantry-item-name">
+                  <a href="/pantry/${item.row.id}">${item.row.name}</a>
+                </h2>
+                ${statusBadge(item)}
               </div>
-              <dl class="pantry-details">
-                <div>
-                  <dt>Stock date</dt>
-                  <dd>${item.row.stockDate ?? "Not set"}</dd>
-                </div>
-                <div>
-                  <dt>Best before</dt>
-                  <dd>
-                    ${
-                      item.row.bestBeforeDays == null
-                        ? "Not set"
-                        : `${item.row.bestBeforeDays} days`
-                    }
-                  </dd>
-                </div>
-                <div>
-                  <dt>Expiry</dt>
-                  <dd>${expiry?.toString() ?? "Not tracked"}</dd>
-                </div>
-              </dl>
+              ${itemDetails(item)}
               <div class="pantry-actions">
                 <a class="btn btn-sm btn-secondary" href="/pantry/${item.row.id}/edit">Edit</a>
+                ${
+                  item.row.status === "in_stock"
+                    ? html`<form method="post" action="/pantry/${item.row.id}/consume">
+                      <button class="btn btn-sm btn-secondary" type="submit">
+                        Mark as consumed
+                      </button>
+                    </form>`
+                    : ""
+                }
                 <form method="post" action="/pantry/${item.row.id}/delete">
                   <button class="btn btn-sm btn-danger" type="submit">Delete</button>
                 </form>
@@ -63,6 +75,26 @@ export function pantryListView(user: User, items: PantryItem[]) {
   </section>`;
 
   return layout("Pantry · Fridge", body, { user });
+}
+
+export function pantryDetailView(user: User, item: PantryItem, calendarReturn?: string) {
+  const body = html`<section class="pantry-detail">
+    <div class="page-heading">
+      <h1 class="page-title">${item.row.name}</h1>
+      ${statusBadge(item)}
+    </div>
+    <article class="pantry-item">
+      ${itemDetails(item)}
+      <div class="pantry-actions">
+        <a class="btn btn-md btn-primary" href="/pantry/${item.row.id}/edit">Edit</a>
+        <a class="btn btn-md btn-secondary" href="${calendarReturn ?? "/pantry"}">
+          ${calendarReturn ? "Back to calendar" : "Back to pantry"}
+        </a>
+      </div>
+    </article>
+  </section>`;
+
+  return layout(`${item.row.name} · Pantry · Fridge`, body, { user });
 }
 
 function statusOptions(status: PantryStatus) {

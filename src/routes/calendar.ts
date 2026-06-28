@@ -29,6 +29,12 @@ function parseDate(value: string | null | undefined, fallback: Date): Date {
   }
 }
 
+function formatDate(date: Date): string {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(
+    date.getDate(),
+  ).padStart(2, "0")}`;
+}
+
 export function createCalendarRoutes(db: Db) {
   const app = new Hono<AppEnv>();
 
@@ -43,9 +49,15 @@ export function createCalendarRoutes(db: Db) {
     // Pantry items with a tracked shelf life become span bars (stock → expiry). All
     // pantry bars share one colour (keyed by kind); other kinds (meals, …) get theirs.
     const items = await PantryItem.available(db, user.id);
+    const returnTo = c.req.query("date") ? `/calendar?date=${formatDate(today)}` : "/calendar";
     const pantryEvents = items
       .map((item) => item.toCalendarEvent())
       .filter((event): event is CalendarEvent => event !== null);
+    for (const event of pantryEvents) {
+      if (event.href) {
+        event.href = `${event.href}?return=${encodeURIComponent(returnTo)}`;
+      }
+    }
 
     // today renders as a cell highlight; pantry spans render as bars.
     const events: CalendarEvent[] = [{ start: today, end: today, kind: "today" }, ...pantryEvents];

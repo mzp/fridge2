@@ -48,6 +48,13 @@ function bar(segment: EventSegment): HtmlEscapedString | Promise<HtmlEscapedStri
     .filter(Boolean)
     .join(" ");
   const style = `grid-column:${segment.startCol + 1}/span ${segment.span};grid-row:${segment.lane + 1}`;
+  if (segment.event.href) {
+    return html`<a
+      class="${classes} calendar-bar-link"
+      style="${style}"
+      href="${segment.event.href}"
+    >${segment.event.label ?? ""}</a>`;
+  }
   return html`<div class="${classes}" style="${style}">${segment.event.label ?? ""}</div>`;
 }
 

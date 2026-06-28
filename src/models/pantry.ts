@@ -100,6 +100,19 @@ export class PantryItem {
     return rows.length > 0;
   }
 
+  /** Mark an item as consumed, scoped to its owner. */
+  static async consume(db: Db, userId: string, id: string): Promise<boolean> {
+    if (!uuidPattern.test(id)) {
+      return false;
+    }
+    const rows = await db
+      .update(pantryItems)
+      .set({ status: "consumed" })
+      .where(and(eq(pantryItems.id, id), eq(pantryItems.userId, userId)))
+      .returning({ id: pantryItems.id });
+    return rows.length > 0;
+  }
+
   /** The day this item goes off, or null when expiry isn't tracked. */
   expiryDate(): Temporal.PlainDate | null {
     const { stockDate, bestBeforeDays } = this.row;
@@ -123,6 +136,7 @@ export class PantryItem {
       end: toLocalDate(expiry),
       kind: "pantry",
       label: this.row.name,
+      href: `/pantry/${this.row.id}`,
     };
   }
 }

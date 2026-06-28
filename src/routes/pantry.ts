@@ -10,7 +10,7 @@ import {
   type PantryItemInput,
   type PantryStatus,
 } from "@/models/pantry.js";
-import { pantryFormView, pantryListView } from "@/views/pantry.js";
+import { pantryDetailView, pantryFormView, pantryListView } from "@/views/pantry.js";
 
 const emptyForm: PantryItemFormValues = {
   name: "",
@@ -80,6 +80,13 @@ function logNotFound(path: string, userId: string, itemId: string): void {
   logger.warn({ path, userId, itemId }, "pantry item not found");
 }
 
+function calendarReturn(value: string | undefined): string | undefined {
+  if (value === "/calendar" || value?.startsWith("/calendar?")) {
+    return value;
+  }
+  return undefined;
+}
+
 export function createPantryRoutes(db: Db) {
   const app = new Hono<AppEnv>();
 
@@ -90,6 +97,17 @@ export function createPantryRoutes(db: Db) {
 
   app.get("/pantry/new", requireAuth, (c) => {
     return c.html(pantryFormView(c.var.user as User, { values: emptyForm }));
+  });
+
+  app.get("/pantry/:id", requireAuth, async (c) => {
+    const user = c.var.user as User;
+    const id = c.req.param("id");
+    const item = await PantryItem.find(db, user.id, id);
+    if (!item) {
+      logNotFound(c.req.path, user.id, id);
+      return c.notFound();
+    }
+    return c.html(pantryDetailView(user, item, calendarReturn(c.req.query("return"))));
   });
 
   app.post("/pantry", requireAuth, async (c) => {
@@ -142,6 +160,16 @@ export function createPantryRoutes(db: Db) {
     const user = c.var.user as User;
     const id = c.req.param("id");
     if (!(await PantryItem.delete(db, user.id, id))) {
+      logNotFound(c.req.path, user.id, id);
+      return c.notFound();
+    }
+    return c.redirect("/pantry", 303);
+  });
+
+  app.post("/pantry/:id/consume", requireAuth, async (c) => {
+    const user = c.var.user as User;
+    const id = c.req.param("id");
+    if (!(await PantryItem.consume(db, user.id, id))) {
       logNotFound(c.req.path, user.id, id);
       return c.notFound();
     }
