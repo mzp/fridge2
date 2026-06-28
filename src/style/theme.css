@@ -9,6 +9,7 @@
   --color-on-primary: var(--color-white);
   --color-secondary: var(--color-gray-600);
   --color-danger: var(--color-red-600);
+
   /* Neutrals — surface, line (borders), ink (text + muted text). */
   --color-surface: var(--color-white);
   --color-surface-muted: var(--color-gray-50);

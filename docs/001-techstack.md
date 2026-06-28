@@ -24,7 +24,8 @@ Why the stack looks the way it does. For the actual commands, see
 - Testing: Vitest for unit/route tests (DB-backed ones run against in-memory
   Postgres via PGlite, so no Docker is needed). Playwright for end-to-end + visual
   regression, run in the official Playwright Docker image. See [004-test.md](./004-test.md).
-- Lint/format: Biome.
+- Lint/format: Biome for JS/TS; Stylelint (`stylelint-config-standard`) for the
+  Tailwind CSS under `src/style/` (Biome ignores CSS).
 - Hosting: Render (free plan). See [003-render.md](./003-render.md).
 
 The repository layout is documented in [CLAUDE.md](../CLAUDE.md).

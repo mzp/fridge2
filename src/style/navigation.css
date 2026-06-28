@@ -3,27 +3,35 @@
   .app-body {
     @apply min-h-screen bg-surface-muted text-ink;
   }
+
   .site-header {
     @apply border-b border-line bg-surface;
   }
+
   .site-nav {
     @apply mx-auto flex max-w-2xl items-center gap-6 px-4 py-3;
   }
+
   .brand {
     @apply font-bold text-primary;
   }
+
   .nav-link {
     @apply text-sm font-medium text-ink-muted hover:text-primary;
   }
+
   .nav-auth {
     @apply ml-auto flex items-center gap-3;
   }
+
   .nav-user {
     @apply text-sm text-ink-muted;
   }
+
   .page {
     @apply mx-auto max-w-lg px-4 py-8;
   }
+
   .page-title {
     @apply mb-6 text-2xl font-bold text-primary;
   }
