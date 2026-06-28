@@ -8,6 +8,7 @@ import { requestLogger } from "@/middlewares/logger.js";
 import { requireBearer } from "@/middlewares/oauth.js";
 import { type AppEnv, sessionMiddleware } from "@/middlewares/session.js";
 import { createAuthRoutes } from "@/routes/auth.js";
+import { createCalendarRoutes } from "@/routes/calendar.js";
 import { createHomeRoutes } from "@/routes/home.js";
 import {
   createOAuthProvider,
@@ -54,6 +55,7 @@ export function createApp(db: Db) {
   app.use("*", sessionMiddleware(db));
   app.route("/", createAuthRoutes(db));
   app.route("/", createHomeRoutes());
+  app.route("/", createCalendarRoutes());
 
   // Test-only: clear app data and re-seed the admin, for E2E isolation between
   // tests. Gated to NODE_ENV=test so it never exists in production.

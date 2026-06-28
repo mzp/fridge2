@@ -27,7 +27,8 @@ export function layout(title: string, body: Html, opts: { user?: User } = {}) {
         <a class="brand" href="/">${appTitle}</a>
         ${
           opts.user
-            ? html`<form class="nav-auth" method="post" action="/logout">
+            ? html`<a class="nav-link" href="/calendar">Calendar</a>
+            <form class="nav-auth" method="post" action="/logout">
               <span class="nav-user">${opts.user.name}</span>
               <button class="btn btn-sm btn-secondary" type="submit">Sign out</button>
             </form>`
