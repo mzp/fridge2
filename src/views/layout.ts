@@ -1,6 +1,7 @@
 import { html } from "hono/html";
 import type { HtmlEscapedString } from "hono/utils/html";
 import type { User } from "@/db/schema.js";
+import { cssVersion } from "@/views/helpers/assets.js";
 
 type Html = HtmlEscapedString | Promise<HtmlEscapedString>;
 
@@ -19,7 +20,7 @@ export function layout(title: string, body: Html, opts: { user?: User } = {}) {
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>${title}</title>
-    <link rel="stylesheet" href="/dist.css" />
+    <link rel="stylesheet" href="/dist.css?v=${cssVersion()}" />
   </head>
   <body class="app-body">
     <header class="site-header">
@@ -27,7 +28,8 @@ export function layout(title: string, body: Html, opts: { user?: User } = {}) {
         <a class="brand" href="/">${appTitle}</a>
         ${
           opts.user
-            ? html`<form class="nav-auth" method="post" action="/logout">
+            ? html`<a class="nav-link" href="/calendar">Calendar</a>
+            <form class="nav-auth" method="post" action="/logout">
               <span class="nav-user">${opts.user.name}</span>
               <button class="btn btn-sm btn-secondary" type="submit">Sign out</button>
             </form>`

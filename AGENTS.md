@@ -12,5 +12,9 @@ Before reading or modifying files, load the applicable additional instructions:
   [`.claude/rules/logging.md`](./.claude/rules/logging.md).
 - Files under `src/mcp/`: read
   [`.claude/rules/mcp-tools.md`](./.claude/rules/mcp-tools.md).
+- Files under `src/style/`: read
+  [`.claude/rules/styles.md`](./.claude/rules/styles.md).
+- A directory `CLAUDE.md` or a file under `.claude/rules/`: read
+  [`.claude/rules/agent-rules.md`](./.claude/rules/agent-rules.md).
 
 Instructions in the more specific file take precedence when they conflict.

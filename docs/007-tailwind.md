@@ -42,7 +42,8 @@ that the component classes consume — never raw scale colors like `emerald-600`
 ## Semantic classes, not inline utilities
 
 **Do not scatter raw utility classes (especially colors) across the markup.** Define
-**semantic component classes** in `public/style.css` with `@apply` inside
+**semantic component classes** in `src/style/` (split by area: theme, navigation,
+form, calendar) with `@apply` inside
 `@layer components`, referencing the palette tokens, and apply those names in the
 templates — so the markup reads by intent.
 
@@ -102,7 +103,7 @@ Add to `package.json` (run through `volta run`):
 
 | Command | What it does |
 |---|---|
-| `css:build` | `npx @tailwindcss/cli -i public/style.css -o public/dist.css` — compile the stylesheet. |
+| `css:build` | `npx @tailwindcss/cli -i src/style/index.css -o public/dist.css` — compile the stylesheet. |
 | `css:watch` | same with `--watch` — rebuild on change in dev. |
 
 Wire `css:build` into the entrypoints so the CSS is never stale:

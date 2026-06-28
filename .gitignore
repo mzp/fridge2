@@ -3,9 +3,6 @@ dist/
 logs/
 *.log
 
-# Tailwind build output (public/style.css is the committed source)
-public/dist.css
-
 # Playwright outputs (snapshot baselines under tests/e2e/**-snapshots/ ARE committed)
 playwright-report/
 test-results/

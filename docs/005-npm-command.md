@@ -13,16 +13,17 @@ workflows in [CLAUDE.md](../CLAUDE.md).
 | `dev` | Build the CSS, then start the dev server with `tsx watch` on `:3000`. Loads `.env` if present. Does **not** auto-migrate or seed (that is production-only). |
 | `build` | Build the CSS, then compile TypeScript to `dist/` via `tsc` + `tsc-alias` (rewrites the `@/*` alias so plain `node` can run it). |
 | `start` | Run the compiled app: `node dist/index.js`. This is what production runs; on boot it migrates + seeds when `NODE_ENV=production`. Loads `.env` if present. |
-| `css:build` | Compile `public/style.css` → `public/dist.css` with the Tailwind CLI. Wired into `dev`/`build`/`start:e2e`. See [007-tailwind.md](./007-tailwind.md). |
+| `css:build` | Compile `src/style/index.css` → `public/dist.css` with the Tailwind CLI. Wired into `dev`/`build`/`start:e2e`. See [007-tailwind.md](./007-tailwind.md). |
 | `css:watch` | Same as `css:build` with `--watch`, for iterating on classes in dev. |
 
 ## Quality
 
 | Command | What it does |
 |---|---|
-| `check` | Umbrella gate: runs `typecheck` → `lint` → `test`, stopping at the first failure. The one command to run before finalizing a change. |
+| `check` | Umbrella gate: runs `typecheck` → `lint` → `lint:css` → `test`, stopping at the first failure. The one command to run before finalizing a change. |
 | `typecheck` | `tsc --noEmit` over `src` and `tests`. |
-| `lint` | `biome check src tests` (lint + import/format checks, no writes). |
+| `lint` | `biome check src tests` (lint + import/format checks, no writes). Biome ignores CSS. |
+| `lint:css` | `stylelint src/style/**/*.css` — lint the Tailwind stylesheets. Auto-fix with `npx stylelint --fix`. See [007-tailwind.md](./007-tailwind.md). |
 | `format` | `biome format --write src tests` (apply formatting). |
 | `test` | `vitest run` — unit + route tests once (E2E is separate). See [004-test.md](./004-test.md). |
 | `test:watch` | `vitest` in watch mode for local iteration. |

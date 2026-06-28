@@ -5,6 +5,7 @@ import { createApp } from "@/app.js";
 import { db } from "@/db/index.js";
 import { runMigrations } from "@/db/migrate.js";
 import { seedAdmin } from "@/db/seed.js";
+import { seedPantry } from "@/db/seed-dev.js";
 import { TEST_LOG_FILE } from "@/logger.js";
 
 // E2E web server. Ensures the test database exists, applies migrations, seeds the
@@ -36,6 +37,7 @@ writeFileSync(TEST_LOG_FILE, "");
 await ensureDatabase();
 await runMigrations();
 await seedAdmin(db);
+await seedPantry(db);
 
 const port = process.env["PORT"] ? Number(process.env["PORT"]) : 3001;
 serve({ fetch: createApp(db).fetch, port }, ({ port }) => {

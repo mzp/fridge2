@@ -11,6 +11,9 @@ import { hashPassword } from "@/lib/password.js";
  * name and password come from the environment and the password is hashed before
  * storage, so no user data or hash is ever committed.
  *
+ * Runs in production too (see src/index.ts). Dev/test-only seed data lives in
+ * src/db/seed-dev.ts.
+ *
  * Returns the seeded name, or null when the env vars are not set.
  */
 export async function seedAdmin(db: Db): Promise<string | null> {
