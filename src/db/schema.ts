@@ -1,5 +1,14 @@
 import type { OAuthClientInformationFull } from "@modelcontextprotocol/sdk/shared/auth.js";
-import { jsonb, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import {
+  date,
+  integer,
+  jsonb,
+  pgTable,
+  text,
+  timestamp,
+  uniqueIndex,
+  uuid,
+} from "drizzle-orm/pg-core";
 
 export const users = pgTable("users", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -10,6 +19,28 @@ export const users = pgTable("users", {
 
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
+
+// --- Pantry ---
+
+/** A pantry item a user has on hand: presence + optional expiry + status. */
+export const pantryItems = pgTable(
+  "pantry_items",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    name: text("name").notNull(),
+    stockDate: date("stock_date", { mode: "string" }), // YYYY-MM-DD; null = no date tracked
+    bestBeforeDays: integer("best_before_days"),
+    status: text("status").notNull().default("in_stock"), // "in_stock" | "consumed"
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [uniqueIndex("pantry_items_user_name_date_idx").on(t.userId, t.name, t.stockDate)],
+);
+
+export type PantryItem = typeof pantryItems.$inferSelect;
+export type NewPantryItem = typeof pantryItems.$inferInsert;
 
 // --- OAuth (MCP authorization server) ---
 
