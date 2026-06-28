@@ -1,0 +1,35 @@
+@layer components {
+  /* Forms */
+  .form {
+    @apply flex flex-col gap-4;
+  }
+  .field {
+    @apply flex flex-col gap-1 text-sm font-medium text-ink;
+  }
+  .form-input {
+    @apply rounded border border-line px-3 py-2 text-base text-ink focus:border-primary focus:outline-none;
+  }
+  .form-error {
+    @apply rounded border border-danger bg-danger/10 px-3 py-2 text-sm text-danger;
+  }
+
+  /* Buttons */
+  .btn {
+    @apply inline-flex items-center justify-center rounded border font-medium transition-colors;
+  }
+  .btn-sm {
+    @apply px-3 py-1 text-sm;
+  }
+  .btn-md {
+    @apply px-4 py-2;
+  }
+  .btn-primary {
+    @apply border-primary bg-primary text-on-primary hover:border-primary/90 hover:bg-primary/90;
+  }
+  .btn-secondary {
+    @apply border-line bg-surface text-secondary hover:bg-surface-muted;
+  }
+  .btn-danger {
+    @apply border-danger text-danger hover:bg-danger/10;
+  }
+}

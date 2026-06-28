@@ -1,8 +1,10 @@
 import { Hono } from "hono";
 import { Temporal } from "temporal-polyfill";
+import type { Db } from "@/db/index.js";
 import type { User } from "@/db/schema.js";
 import { type AppEnv, requireAuth } from "@/middlewares/session.js";
-import { buildCalendar, type CalendarEvent } from "@/models/calendar.js";
+import { Calendar, type CalendarEvent } from "@/models/calendar.js";
+import { PantryItem } from "@/models/pantry.js";
 import { calendarView } from "@/views/calendar.js";
 
 /**
@@ -27,18 +29,26 @@ function parseDate(value: string | null | undefined, fallback: Date): Date {
   }
 }
 
-export function createCalendarRoutes() {
+export function createCalendarRoutes(db: Db) {
   const app = new Hono<AppEnv>();
 
-  app.get("/calendar", requireAuth, (c) => {
+  app.get("/calendar", requireAuth, async (c) => {
     // requireAuth guarantees a user; assert it so the view gets a non-null User.
     const user = c.var.user as User;
     // Reference day: ?date=YYYY-MM-DD if given (keeps rendering deterministic for
-    // tests/navigation), otherwise the current day. Three layers: build, mark, render.
+    // tests), otherwise the current day.
     const today = parseDate(c.req.query("date"), new Date());
-    const calendar = buildCalendar(today.getFullYear(), today.getMonth());
-    // today is the first overlay event; meals and the like will join this list.
-    const events: CalendarEvent[] = [{ start: today, end: today, kind: "today" }];
+    const calendar = Calendar.create(today.getFullYear(), today.getMonth());
+
+    // Pantry items with a tracked shelf life become span bars (stock → expiry). All
+    // pantry bars share one colour (keyed by kind); other kinds (meals, …) get theirs.
+    const items = await PantryItem.available(db, user.id);
+    const pantryEvents = items
+      .map((item) => item.toCalendarEvent())
+      .filter((event): event is CalendarEvent => event !== null);
+
+    // today renders as a cell highlight; pantry spans render as bars.
+    const events: CalendarEvent[] = [{ start: today, end: today, kind: "today" }, ...pantryEvents];
     return c.html(calendarView(user, calendar, events));
   });
 

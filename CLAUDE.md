@@ -31,11 +31,14 @@ src/
   index.ts        Server entrypoint (in prod: migrate + seed admin, then start Hono)
   app.ts          App assembly and route mounting
   logger.ts       Pino logger (JSON to stdout; pretty in dev)
+  style/          Tailwind source (committed): index.css + theme/navigation/form/
+                  calendar; compiled to public/dist.css
   db/
     schema.ts     Drizzle schema
     index.ts      DB connection (reads DATABASE_URL)
     migrate.ts    runMigrations: applies committed migrations (used in prod on boot)
     seed.ts       seedAdmin: idempotent admin upsert from SEED_ADMIN_*
+    seed-dev.ts   seedPantry: dev/test-only sample data (never run in prod)
   lib/
     password.ts   scrypt hash/verify
   mcp/            MCP server (index.ts) + one file per tool (ping.ts); at /mcp
@@ -43,8 +46,7 @@ src/
   routes/         Hono route modules: auth, home, oauth/ (OAuth AS at /oauth +
                   provider; well-known discovery served at root)
   views/          hono/html page templates (layout, login, home)
-public/
-  style.css       Tailwind source (committed); dist.css is the gitignored build
+public/           dist.css: the gitignored Tailwind build output, served at /dist.css
 db/
   migrations/     drizzle-kit migrations (committed; the source of truth for prod)
 scripts/
@@ -94,7 +96,7 @@ volta run npm run db:seed     # seed admin only (from SEED_ADMIN_* in .env)
 ```
 
 **UI** — markup lives in `src/views/`; styles are semantic classes in
-`public/style.css` (see [docs/007-tailwind.md](./docs/007-tailwind.md)). `dev`/`build`
+`src/style/` (index.css + per-area files; see [docs/007-tailwind.md](./docs/007-tailwind.md)). `dev`/`build`
 compile the CSS automatically; while iterating on classes:
 
 ```bash

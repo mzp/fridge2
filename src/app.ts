@@ -3,6 +3,7 @@ import { Hono } from "hono";
 import type { Db } from "@/db/index.js";
 import { users } from "@/db/schema.js";
 import { seedAdmin } from "@/db/seed.js";
+import { seedPantry } from "@/db/seed-dev.js";
 import { mcpHandler } from "@/mcp/index.js";
 import { requestLogger } from "@/middlewares/logger.js";
 import { requireBearer } from "@/middlewares/oauth.js";
@@ -55,7 +56,7 @@ export function createApp(db: Db) {
   app.use("*", sessionMiddleware(db));
   app.route("/", createAuthRoutes(db));
   app.route("/", createHomeRoutes());
-  app.route("/", createCalendarRoutes());
+  app.route("/", createCalendarRoutes(db));
 
   // Test-only: clear app data and re-seed the admin, for E2E isolation between
   // tests. Gated to NODE_ENV=test so it never exists in production.
@@ -63,6 +64,7 @@ export function createApp(db: Db) {
     app.post("/__test__/reset", async (c) => {
       await db.delete(users);
       await seedAdmin(db);
+      await seedPantry(db);
       return c.body(null, 204);
     });
   }

@@ -1,48 +1,66 @@
-import { Temporal } from "temporal-polyfill";
+import { createTestDb } from "@test/helpers/db.js";
 import { describe, expect, it } from "vitest";
-import { daysRemaining, expiryStatus } from "@/models/pantry.js";
+import { type PantryItem as PantryItemRow, pantryItems, users } from "@/db/schema.js";
+import { PantryItem } from "@/models/pantry.js";
 
-const today = Temporal.PlainDate.from("2026-06-27");
+/** A pantry row with overridable fields, for the pure (non-DB) cases. */
+const row = (over: Partial<PantryItemRow>): PantryItemRow => ({
+  id: "00000000-0000-0000-0000-000000000001",
+  userId: "00000000-0000-0000-0000-000000000002",
+  name: "milk",
+  stockDate: null,
+  bestBeforeDays: null,
+  status: "in_stock",
+  createdAt: new Date(2026, 5, 15),
+  ...over,
+});
 
-describe("daysRemaining", () => {
-  it("counts whole days until expiry", () => {
-    // Stocked 2026-06-20, good for 10 days → expires 2026-06-30, 3 days out.
-    expect(daysRemaining("2026-06-20", 10, today)).toBe(3);
+describe("PantryItem.expiryDate", () => {
+  it("is the stock date plus best-before days", () => {
+    const item = new PantryItem(row({ stockDate: "2026-06-15", bestBeforeDays: 5 }));
+    expect(item.expiryDate()?.toString()).toBe("2026-06-20");
   });
 
-  it("is 0 on the expiry day itself", () => {
-    expect(daysRemaining("2026-06-20", 7, today)).toBe(0);
-  });
-
-  it("goes negative once past", () => {
-    expect(daysRemaining("2026-06-20", 5, today)).toBe(-2);
-  });
-
-  it("is null when expiry isn't tracked", () => {
-    expect(daysRemaining(null, 10, today)).toBeNull();
-    expect(daysRemaining("2026-06-20", null, today)).toBeNull();
+  it("is null when stock date or best-before days is missing", () => {
+    expect(new PantryItem(row({ stockDate: null, bestBeforeDays: 5 })).expiryDate()).toBeNull();
+    expect(new PantryItem(row({ stockDate: "2026-06-15" })).expiryDate()).toBeNull();
   });
 });
 
-describe("expiryStatus", () => {
-  it("is none without a tracked expiry", () => {
-    expect(expiryStatus(null, null, today)).toBe("none");
-    expect(expiryStatus("2026-06-20", null, today)).toBe("none");
+describe("PantryItem.toCalendarEvent", () => {
+  it("spans stock date to expiry as a pantry-kind event", () => {
+    const item = new PantryItem(row({ name: "milk", stockDate: "2026-06-15", bestBeforeDays: 5 }));
+    expect(item.toCalendarEvent()).toEqual({
+      start: new Date(2026, 5, 15),
+      end: new Date(2026, 5, 20),
+      kind: "pantry",
+      label: "milk",
+    });
   });
 
-  it("is fresh when comfortably ahead", () => {
-    expect(expiryStatus("2026-06-20", 14, today)).toBe("fresh"); // 7 days out
+  it("is null without a tracked shelf life", () => {
+    expect(
+      new PantryItem(row({ stockDate: null, bestBeforeDays: 5 })).toCalendarEvent(),
+    ).toBeNull();
+    expect(new PantryItem(row({ stockDate: "2026-06-15" })).toCalendarEvent()).toBeNull();
   });
+});
 
-  it("is soon at the 3-day boundary", () => {
-    expect(expiryStatus("2026-06-20", 10, today)).toBe("soon"); // exactly 3 days out
-  });
+describe("PantryItem.available", () => {
+  it("returns only the given user's in-stock items", async () => {
+    const db = await createTestDb();
+    const [u1] = await db.insert(users).values({ name: "u1", passwordHash: "x" }).returning();
+    const [u2] = await db.insert(users).values({ name: "u2", passwordHash: "x" }).returning();
+    if (!u1 || !u2) {
+      throw new Error("failed to seed users");
+    }
+    await db.insert(pantryItems).values([
+      { userId: u1.id, name: "milk", status: "in_stock" },
+      { userId: u1.id, name: "finished", status: "consumed" },
+      { userId: u2.id, name: "other user's", status: "in_stock" },
+    ]);
 
-  it("is soon on the expiry day", () => {
-    expect(expiryStatus("2026-06-20", 7, today)).toBe("soon"); // 0 days out
-  });
-
-  it("is expired once past", () => {
-    expect(expiryStatus("2026-06-20", 5, today)).toBe("expired"); // -2 days
+    const items = await PantryItem.available(db, u1.id);
+    expect(items.map((i) => i.row.name)).toEqual(["milk"]);
   });
 });

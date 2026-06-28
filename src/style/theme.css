@@ -1,0 +1,18 @@
+/*
+ * Color palette. Change these tokens to restyle the whole app — components
+ * reference them (bg-primary, text-ink, border-line, …), never raw color
+ * utilities. See docs/007-tailwind.md.
+ */
+@theme {
+  /* Brand & intent — mapped to the nearest Tailwind scale colours. */
+  --color-primary: var(--color-emerald-600);
+  --color-on-primary: var(--color-white);
+  --color-secondary: var(--color-gray-600);
+  --color-danger: var(--color-red-600);
+  /* Neutrals — surface, line (borders), ink (text + muted text). */
+  --color-surface: var(--color-white);
+  --color-surface-muted: var(--color-gray-50);
+  --color-line: var(--color-gray-200);
+  --color-ink: var(--color-gray-900);
+  --color-ink-muted: var(--color-gray-500);
+}

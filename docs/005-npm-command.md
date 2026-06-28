@@ -13,7 +13,7 @@ workflows in [CLAUDE.md](../CLAUDE.md).
 | `dev` | Build the CSS, then start the dev server with `tsx watch` on `:3000`. Loads `.env` if present. Does **not** auto-migrate or seed (that is production-only). |
 | `build` | Build the CSS, then compile TypeScript to `dist/` via `tsc` + `tsc-alias` (rewrites the `@/*` alias so plain `node` can run it). |
 | `start` | Run the compiled app: `node dist/index.js`. This is what production runs; on boot it migrates + seeds when `NODE_ENV=production`. Loads `.env` if present. |
-| `css:build` | Compile `public/style.css` → `public/dist.css` with the Tailwind CLI. Wired into `dev`/`build`/`start:e2e`. See [007-tailwind.md](./007-tailwind.md). |
+| `css:build` | Compile `src/style/index.css` → `public/dist.css` with the Tailwind CLI. Wired into `dev`/`build`/`start:e2e`. See [007-tailwind.md](./007-tailwind.md). |
 | `css:watch` | Same as `css:build` with `--watch`, for iterating on classes in dev. |
 
 ## Quality

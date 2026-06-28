@@ -1,56 +1,54 @@
+import { and, eq } from "drizzle-orm";
 import { Temporal } from "temporal-polyfill";
+import type { Db } from "@/db/index.js";
+import { type PantryItem as PantryItemRow, pantryItems } from "@/db/schema.js";
+import type { CalendarEvent } from "@/models/calendar.js";
 
-/**
- * Pantry model — pure expiry logic, no DB access (that lives in routes/MCP tools).
- * An item's freshness derives from its `stockDate` plus `bestBeforeDays`; an item
- * missing either has no tracked expiry.
- */
-
-export type ExpiryStatus = "none" | "expired" | "soon" | "fresh";
 export type PantryStatus = "in_stock" | "consumed";
 
-/** Within this many days of expiry an item counts as expiring "soon". */
-const EXPIRES_SOON_DAYS = 3;
+const toLocalDate = (date: Temporal.PlainDate): Date =>
+  new Date(date.year, date.month - 1, date.day);
 
-/** The day an item goes off, or null when expiry isn't tracked. */
-export function expiryDate(
-  stockDate: string | null,
-  bestBeforeDays: number | null,
-): Temporal.PlainDate | null {
-  if (stockDate == null || bestBeforeDays == null) {
-    return null;
-  }
-  return Temporal.PlainDate.from(stockDate).add({ days: bestBeforeDays });
-}
+/**
+ * Pantry domain model. Wraps a `pantry_items` row and owns its data access (the
+ * queries) and its projection onto the calendar — so routes/MCP tools ask the
+ * model rather than hand-rolling SQL or conversions.
+ */
+export class PantryItem {
+  constructor(readonly row: PantryItemRow) {}
 
-/** Whole days from `today` until expiry (negative once past), or null if untracked. */
-export function daysRemaining(
-  stockDate: string | null,
-  bestBeforeDays: number | null,
-  today: Temporal.PlainDate,
-): number | null {
-  const expiry = expiryDate(stockDate, bestBeforeDays);
-  if (expiry == null) {
-    return null;
+  /** The in-stock pantry items belonging to a user. */
+  static async available(db: Db, userId: string): Promise<PantryItem[]> {
+    const rows = await db
+      .select()
+      .from(pantryItems)
+      .where(and(eq(pantryItems.userId, userId), eq(pantryItems.status, "in_stock")));
+    return rows.map((row) => new PantryItem(row));
   }
-  return today.until(expiry).days;
-}
 
-/** Freshness bucket for an item relative to `today`. */
-export function expiryStatus(
-  stockDate: string | null,
-  bestBeforeDays: number | null,
-  today: Temporal.PlainDate,
-): ExpiryStatus {
-  const days = daysRemaining(stockDate, bestBeforeDays, today);
-  if (days == null) {
-    return "none";
+  /** The day this item goes off, or null when expiry isn't tracked. */
+  expiryDate(): Temporal.PlainDate | null {
+    const { stockDate, bestBeforeDays } = this.row;
+    if (stockDate == null || bestBeforeDays == null) {
+      return null;
+    }
+    return Temporal.PlainDate.from(stockDate).add({ days: bestBeforeDays });
   }
-  if (days < 0) {
-    return "expired";
+
+  /**
+   * The item as a calendar span bar (stock date → expiry), or null when it has no
+   * tracked shelf life to draw.
+   */
+  toCalendarEvent(): CalendarEvent | null {
+    const expiry = this.expiryDate();
+    if (this.row.stockDate == null || expiry == null) {
+      return null;
+    }
+    return {
+      start: toLocalDate(Temporal.PlainDate.from(this.row.stockDate)),
+      end: toLocalDate(expiry),
+      kind: "pantry",
+      label: this.row.name,
+    };
   }
-  if (days <= EXPIRES_SOON_DAYS) {
-    return "soon";
-  }
-  return "fresh";
 }

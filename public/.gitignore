@@ -1,0 +1,4 @@
+# The Tailwind build output (dist.css) lands here. Keep the directory in git but
+# ignore its contents — same purpose as a .gitkeep.
+*
+!.gitignore
