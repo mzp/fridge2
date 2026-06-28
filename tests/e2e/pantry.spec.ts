@@ -44,7 +44,7 @@ test("opens a pantry item from its calendar event", async ({ page }) => {
   await page.goto("/calendar?date=2026-06-15");
   await page.getByRole("link", { name: "milk" }).click();
 
-  await expect(page).toHaveURL(/\/pantry\/[0-9a-f-]+\?return=/);
+  await expect(page).toHaveURL(/\/pantry\/\d+\?return=/);
   await expect(page.getByRole("heading", { name: "milk" })).toBeVisible();
   await expect(page.getByRole("link", { name: "Back to calendar" })).toBeVisible();
   await expect(page).toHaveScreenshot("pantry-detail.png");

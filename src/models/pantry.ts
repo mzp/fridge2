@@ -14,8 +14,6 @@ export type PantryItemFormValues = Record<PantryItemFormTextField, string> & {
   status: PantryStatus;
 };
 
-const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-
 const toLocalDate = (date: Temporal.PlainDate): Date =>
   new Date(date.year, date.month - 1, date.day);
 
@@ -47,10 +45,7 @@ export class PantryItem {
   }
 
   /** Find an item only when it belongs to the given user. */
-  static async find(db: Db, userId: string, id: string): Promise<PantryItem | null> {
-    if (!uuidPattern.test(id)) {
-      return null;
-    }
+  static async find(db: Db, userId: string, id: number): Promise<PantryItem | null> {
     const [row] = await db
       .select()
       .from(pantryItems)
@@ -74,12 +69,9 @@ export class PantryItem {
   static async update(
     db: Db,
     userId: string,
-    id: string,
+    id: number,
     input: PantryItemInput,
   ): Promise<PantryItem | null> {
-    if (!uuidPattern.test(id)) {
-      return null;
-    }
     const [row] = await db
       .update(pantryItems)
       .set(input)
@@ -89,10 +81,7 @@ export class PantryItem {
   }
 
   /** Delete an item scoped to its owner. */
-  static async delete(db: Db, userId: string, id: string): Promise<boolean> {
-    if (!uuidPattern.test(id)) {
-      return false;
-    }
+  static async delete(db: Db, userId: string, id: number): Promise<boolean> {
     const rows = await db
       .delete(pantryItems)
       .where(and(eq(pantryItems.id, id), eq(pantryItems.userId, userId)))
@@ -101,10 +90,7 @@ export class PantryItem {
   }
 
   /** Mark an item as consumed, scoped to its owner. */
-  static async consume(db: Db, userId: string, id: string): Promise<boolean> {
-    if (!uuidPattern.test(id)) {
-      return false;
-    }
+  static async consume(db: Db, userId: string, id: number): Promise<boolean> {
     const rows = await db
       .update(pantryItems)
       .set({ status: "consumed" })

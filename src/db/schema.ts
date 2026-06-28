@@ -26,7 +26,7 @@ export type NewUser = typeof users.$inferInsert;
 export const pantryItems = pgTable(
   "pantry_items",
   {
-    id: uuid("id").primaryKey().defaultRandom(),
+    id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
     userId: uuid("user_id")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),

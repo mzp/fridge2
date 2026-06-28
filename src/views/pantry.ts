@@ -110,7 +110,7 @@ export function pantryFormView(
   opts: {
     values: PantryItemFormValues;
     error?: string;
-    itemId?: string;
+    itemId?: number;
   },
 ) {
   const editing = opts.itemId !== undefined;

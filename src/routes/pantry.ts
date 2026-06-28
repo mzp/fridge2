@@ -76,8 +76,16 @@ function valuesFor(item: PantryItem): PantryItemFormValues {
   };
 }
 
-function logNotFound(path: string, userId: string, itemId: string): void {
+function logNotFound(path: string, userId: string, itemId: string | number): void {
   logger.warn({ path, userId, itemId }, "pantry item not found");
+}
+
+function pantryId(value: string): number | null {
+  if (!/^[1-9]\d*$/.test(value)) {
+    return null;
+  }
+  const id = Number(value);
+  return Number.isSafeInteger(id) ? id : null;
 }
 
 function calendarReturn(value: string | undefined): string | undefined {
@@ -101,7 +109,12 @@ export function createPantryRoutes(db: Db) {
 
   app.get("/pantry/:id", requireAuth, async (c) => {
     const user = c.var.user as User;
-    const id = c.req.param("id");
+    const idParam = c.req.param("id");
+    const id = pantryId(idParam);
+    if (id === null) {
+      logNotFound(c.req.path, user.id, idParam);
+      return c.notFound();
+    }
     const item = await PantryItem.find(db, user.id, id);
     if (!item) {
       logNotFound(c.req.path, user.id, id);
@@ -127,7 +140,12 @@ export function createPantryRoutes(db: Db) {
 
   app.get("/pantry/:id/edit", requireAuth, async (c) => {
     const user = c.var.user as User;
-    const id = c.req.param("id");
+    const idParam = c.req.param("id");
+    const id = pantryId(idParam);
+    if (id === null) {
+      logNotFound(c.req.path, user.id, idParam);
+      return c.notFound();
+    }
     const item = await PantryItem.find(db, user.id, id);
     if (!item) {
       logNotFound(c.req.path, user.id, id);
@@ -138,7 +156,12 @@ export function createPantryRoutes(db: Db) {
 
   app.post("/pantry/:id", requireAuth, async (c) => {
     const user = c.var.user as User;
-    const id = c.req.param("id");
+    const idParam = c.req.param("id");
+    const id = pantryId(idParam);
+    if (id === null) {
+      logNotFound(c.req.path, user.id, idParam);
+      return c.notFound();
+    }
     const values = formValues(await c.req.parseBody());
     const result = validate(values);
     if ("error" in result) {
@@ -158,7 +181,12 @@ export function createPantryRoutes(db: Db) {
 
   app.post("/pantry/:id/delete", requireAuth, async (c) => {
     const user = c.var.user as User;
-    const id = c.req.param("id");
+    const idParam = c.req.param("id");
+    const id = pantryId(idParam);
+    if (id === null) {
+      logNotFound(c.req.path, user.id, idParam);
+      return c.notFound();
+    }
     if (!(await PantryItem.delete(db, user.id, id))) {
       logNotFound(c.req.path, user.id, id);
       return c.notFound();
@@ -168,7 +196,12 @@ export function createPantryRoutes(db: Db) {
 
   app.post("/pantry/:id/consume", requireAuth, async (c) => {
     const user = c.var.user as User;
-    const id = c.req.param("id");
+    const idParam = c.req.param("id");
+    const id = pantryId(idParam);
+    if (id === null) {
+      logNotFound(c.req.path, user.id, idParam);
+      return c.notFound();
+    }
     if (!(await PantryItem.consume(db, user.id, id))) {
       logNotFound(c.req.path, user.id, id);
       return c.notFound();

@@ -5,7 +5,7 @@ import { PantryItem } from "@/models/pantry.js";
 
 /** A pantry row with overridable fields, for the pure (non-DB) cases. */
 const row = (over: Partial<PantryItemRow>): PantryItemRow => ({
-  id: "00000000-0000-0000-0000-000000000001",
+  id: 1,
   userId: "00000000-0000-0000-0000-000000000002",
   name: "milk",
   stockDate: null,
@@ -35,7 +35,7 @@ describe("PantryItem.toCalendarEvent", () => {
       end: new Date(2026, 5, 20),
       kind: "pantry",
       label: "milk",
-      href: "/pantry/00000000-0000-0000-0000-000000000001",
+      href: "/pantry/1",
     });
   });
 
@@ -67,6 +67,30 @@ describe("PantryItem.available", () => {
 });
 
 describe("PantryItem persistence", () => {
+  it("assigns sequential integer IDs", async () => {
+    const db = await createTestDb();
+    const [user] = await db.insert(users).values({ name: "owner", passwordHash: "x" }).returning();
+    if (!user) {
+      throw new Error("failed to seed user");
+    }
+
+    const first = await PantryItem.create(db, user.id, {
+      name: "rice",
+      stockDate: null,
+      bestBeforeDays: null,
+      status: "in_stock",
+    });
+    const second = await PantryItem.create(db, user.id, {
+      name: "beans",
+      stockDate: null,
+      bestBeforeDays: null,
+      status: "in_stock",
+    });
+
+    expect(first.row.id).toBe(1);
+    expect(second.row.id).toBe(2);
+  });
+
   it("creates, reads, updates, lists, and deletes an owner's item", async () => {
     const db = await createTestDb();
     const [user] = await db.insert(users).values({ name: "owner", passwordHash: "x" }).returning();
@@ -129,9 +153,6 @@ describe("PantryItem persistence", () => {
     expect(await PantryItem.update(db, other.id, item.row.id, replacement)).toBeNull();
     expect(await PantryItem.delete(db, other.id, item.row.id)).toBe(false);
     expect(await PantryItem.consume(db, other.id, item.row.id)).toBe(false);
-    expect(await PantryItem.find(db, owner.id, "not-a-uuid")).toBeNull();
-    expect(await PantryItem.update(db, owner.id, "not-a-uuid", replacement)).toBeNull();
-    expect(await PantryItem.delete(db, owner.id, "not-a-uuid")).toBe(false);
     expect((await PantryItem.find(db, owner.id, item.row.id))?.row.name).toBe("milk");
   });
 });

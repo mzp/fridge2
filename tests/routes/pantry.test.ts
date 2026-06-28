@@ -46,7 +46,7 @@ function authenticatedForm(cookie: string, data: Record<string, string>): Reques
   };
 }
 
-async function itemId(db: Db, name: string): Promise<string> {
+async function itemId(db: Db, name: string): Promise<number> {
   const item = await db.query.pantryItems.findFirst({ where: eq(pantryItems.name, name) });
   if (!item) {
     throw new Error(`missing pantry item: ${name}`);
@@ -65,6 +65,13 @@ describe("pantry routes", () => {
     const res = await context.app.request("/pantry");
     expect(res.status).toBe(302);
     expect(res.headers.get("location")).toBe("/login");
+  });
+
+  it("returns 404 for a non-integer item ID", async () => {
+    const res = await context.app.request("/pantry/not-a-number", {
+      headers: { cookie: context.cookie },
+    });
+    expect(res.status).toBe(404);
   });
 
   it("rejects invalid input and preserves the submitted value", async () => {
