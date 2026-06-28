@@ -1,23 +1,15 @@
 /**
- * Calendar model. Two layers live here:
+ * Calendar model — the pure structure of a month: which dates fall on which day,
+ * padded into whole Sunday-first weeks. It knows nothing about "now" or content;
+ * those are overlaid as events (see `CalendarEvent`).
  *
- *   1. `buildCalendar` — the pure structure of a month (which dates fall on which
- *      day, padded into whole Sunday-first weeks). It knows nothing about "now".
- *   2. `markToday` — processing that annotates that structure with which cell, if
- *      any, is today.
- *
- * Rendering (labels, markup) is the view's job; see `src/views/calendar.ts`.
+ * Rendering (labels, markup, event placement) is the view's job; see
+ * `src/views/calendar.ts`.
  */
 
-/**
- * A single calendar cell: the actual calendar `date` it represents and whether it
- * is today. Whether the cell falls inside the displayed month is derivable from
- * `date` vs the calendar's `month` — that's the view's call. `buildCalendar`
- * leaves `isToday` false; `markToday` sets it.
- */
+/** A single calendar cell: the actual calendar `date` it represents. */
 export interface CalendarDay {
   date: Date;
-  isToday: boolean;
 }
 
 /**
@@ -32,9 +24,20 @@ export interface Calendar {
 }
 
 /**
+ * Something laid over the date grid for an inclusive `start`..`end` range. `kind`
+ * drives styling — today is just an event of kind `"today"`; meals and the like
+ * will be further kinds. Single-day items have `start` equal to `end`.
+ */
+export interface CalendarEvent {
+  start: Date;
+  end: Date;
+  kind: string;
+}
+
+/**
  * Build the month containing `year`/`month` (0-indexed). Days run Sunday-first and
  * are padded to a whole number of weeks; leading/trailing cells are the real dates
- * of the adjacent months. No day is today until `markToday` runs.
+ * of the adjacent months.
  */
 export function buildCalendar(year: number, month: number): Calendar {
   const start = new Date(year, month, 1).getDay(); // 0 = Sunday
@@ -44,24 +47,7 @@ export function buildCalendar(year: number, month: number): Calendar {
   const days: CalendarDay[] = [];
   for (let i = 0; i < total; i++) {
     // Day-of-month arithmetic rolls negatives/overflows into the adjacent months.
-    days.push({ date: new Date(year, month, 1 - start + i), isToday: false });
+    days.push({ date: new Date(year, month, 1 - start + i) });
   }
   return { year, month, days };
-}
-
-/**
- * Map every day of a calendar, returning a new calendar. Lets callers apply a
- * per-day transform (e.g. `markToday`) without reaching into `days` themselves.
- */
-export function mapDays(calendar: Calendar, fn: (day: CalendarDay) => CalendarDay): Calendar {
-  return { year: calendar.year, month: calendar.month, days: calendar.days.map(fn) };
-}
-
-/** Mark a single day as today when its real date matches `today`. */
-export function markToday(day: CalendarDay, today: Date): CalendarDay {
-  const isToday =
-    day.date.getFullYear() === today.getFullYear() &&
-    day.date.getMonth() === today.getMonth() &&
-    day.date.getDate() === today.getDate();
-  return { ...day, isToday };
 }
