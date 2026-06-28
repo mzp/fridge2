@@ -1,5 +1,5 @@
 @layer components {
-  /* App shell: body, header, brand/nav, page container. */
+  /* App shell: body, header, and navigation. */
   .app-body {
     @apply min-h-screen bg-surface-muted text-ink;
   }
@@ -28,11 +28,4 @@
     @apply text-sm text-ink-muted;
   }
 
-  .page {
-    @apply mx-auto max-w-lg px-4 py-8;
-  }
-
-  .page-title {
-    @apply mb-6 text-2xl font-bold text-primary;
-  }
 }

@@ -64,3 +64,68 @@ describe("PantryItem.available", () => {
     expect(items.map((i) => i.row.name)).toEqual(["milk"]);
   });
 });
+
+describe("PantryItem persistence", () => {
+  it("creates, reads, updates, lists, and deletes an owner's item", async () => {
+    const db = await createTestDb();
+    const [user] = await db.insert(users).values({ name: "owner", passwordHash: "x" }).returning();
+    if (!user) {
+      throw new Error("failed to seed user");
+    }
+
+    const created = await PantryItem.create(db, user.id, {
+      name: "rice",
+      stockDate: "2026-06-20",
+      bestBeforeDays: 30,
+      status: "in_stock",
+    });
+    expect((await PantryItem.find(db, user.id, created.row.id))?.row.name).toBe("rice");
+    expect((await PantryItem.all(db, user.id)).map((item) => item.row.name)).toEqual(["rice"]);
+
+    const updated = await PantryItem.update(db, user.id, created.row.id, {
+      name: "brown rice",
+      stockDate: null,
+      bestBeforeDays: null,
+      status: "consumed",
+    });
+    expect(updated?.row).toMatchObject({
+      name: "brown rice",
+      stockDate: null,
+      bestBeforeDays: null,
+      status: "consumed",
+    });
+
+    expect(await PantryItem.delete(db, user.id, created.row.id)).toBe(true);
+    expect(await PantryItem.find(db, user.id, created.row.id)).toBeNull();
+    expect(await PantryItem.delete(db, user.id, created.row.id)).toBe(false);
+  });
+
+  it("does not find, update, or delete another user's item", async () => {
+    const db = await createTestDb();
+    const [owner] = await db.insert(users).values({ name: "owner", passwordHash: "x" }).returning();
+    const [other] = await db.insert(users).values({ name: "other", passwordHash: "x" }).returning();
+    if (!owner || !other) {
+      throw new Error("failed to seed users");
+    }
+    const item = await PantryItem.create(db, owner.id, {
+      name: "milk",
+      stockDate: null,
+      bestBeforeDays: null,
+      status: "in_stock",
+    });
+    const replacement = {
+      name: "stolen",
+      stockDate: null,
+      bestBeforeDays: null,
+      status: "consumed" as const,
+    };
+
+    expect(await PantryItem.find(db, other.id, item.row.id)).toBeNull();
+    expect(await PantryItem.update(db, other.id, item.row.id, replacement)).toBeNull();
+    expect(await PantryItem.delete(db, other.id, item.row.id)).toBe(false);
+    expect(await PantryItem.find(db, owner.id, "not-a-uuid")).toBeNull();
+    expect(await PantryItem.update(db, owner.id, "not-a-uuid", replacement)).toBeNull();
+    expect(await PantryItem.delete(db, owner.id, "not-a-uuid")).toBe(false);
+    expect((await PantryItem.find(db, owner.id, item.row.id))?.row.name).toBe("milk");
+  });
+});

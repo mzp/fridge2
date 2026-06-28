@@ -3,5 +3,7 @@
 /* App styles, split by area. */
 @import "./theme.css";
 @import "./navigation.css";
+@import "./page.css";
 @import "./form.css";
 @import "./calendar.css";
+@import "./pantry.css";
