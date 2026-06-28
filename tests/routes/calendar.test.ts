@@ -4,8 +4,8 @@ import { createApp } from "@/app.js";
 import { users } from "@/db/schema.js";
 import { hashPassword } from "@/lib/password.js";
 
-// The rendered happy path is left for an e2e test; the calendar structure is
-// covered by tests/models/calendar.test.ts. Here we only cover the auth guard.
+// The rendered happy path (including ?date=) is covered by e2e; the calendar
+// structure by tests/models/calendar.test.ts. Here we only cover the auth guard.
 
 const NAME = "admin";
 const PASSWORD = "correct horse";
