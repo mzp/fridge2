@@ -41,9 +41,8 @@ src/
     seed-dev.ts   seedPantry: dev/test-only sample data (never run in prod)
   lib/
     password.ts   scrypt hash/verify
-  mcp/            MCP server (index.ts) + one file per tool (ping.ts; pantry CRUD:
-                  list-pantry/add-/update-/consume-/remove-pantry-item.ts, shared
-                  fields in pantry-fields.ts); at /mcp
+  mcp/            MCP server (index.ts) + one file per tool, at /mcp; pantry tools
+                  grouped under mcp/pantry/; tool inventory in docs/006-mcp.md
   middlewares/    session.ts (web cookie login), oauth.ts (Bearer guard; sets
                   c.var.userId from the token), logger.ts (request log)
   models/         Domain models and projections: calendar, pantry

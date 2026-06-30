@@ -21,21 +21,21 @@ beforeAll(async () => {
 afterAll(() => srv.close());
 
 describe("mcp: list_pantry", () => {
-  it("lists all items with a computed expiry date", async () => {
+  it("defaults to in-stock items only, with a computed expiry date", async () => {
     const client = await connectMcp(srv, token);
     const res = await client.callTool({ name: "list_pantry", arguments: {} });
     await client.close();
     const items = JSON.parse(resultText(res)) as { name: string; expiryDate: string | null }[];
-    expect(items.map((i) => i.name).sort()).toEqual(["leftovers", "milk"]);
+    expect(items.map((i) => i.name)).toEqual(["milk"]); // "leftovers" is consumed
     expect(items.find((i) => i.name === "milk")?.expiryDate).toBe("2026-06-06");
-    expect(items.find((i) => i.name === "leftovers")?.expiryDate).toBeNull();
   });
 
-  it("returns only in-stock items when inStockOnly is true", async () => {
+  it("includes consumed items when inStockOnly is false", async () => {
     const client = await connectMcp(srv, token);
-    const res = await client.callTool({ name: "list_pantry", arguments: { inStockOnly: true } });
+    const res = await client.callTool({ name: "list_pantry", arguments: { inStockOnly: false } });
     await client.close();
-    const items = JSON.parse(resultText(res)) as { name: string }[];
-    expect(items.map((i) => i.name)).toEqual(["milk"]);
+    const items = JSON.parse(resultText(res)) as { name: string; expiryDate: string | null }[];
+    expect(items.map((i) => i.name).sort()).toEqual(["leftovers", "milk"]);
+    expect(items.find((i) => i.name === "leftovers")?.expiryDate).toBeNull();
   });
 });

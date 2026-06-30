@@ -5,6 +5,12 @@ Conventions for files under `tests/`. (Why testing is set up this way:
 
 ## Naming
 
+**Mirror `src/` structure.** A test lives at the path you get by mapping the
+source under test from `src/` to `tests/` — same subdirectories, so the two trees
+stay in step. When you move or regroup source files, move their tests to match (and
+vice versa). The exception is `tests/e2e/`, which is organised by URL/page rather
+than source file (see below).
+
 - `tests/lib/` and `tests/routes/` mirror the source module they test:
   `src/routes/auth.ts` → `tests/routes/auth.test.ts`,
   `src/lib/password.ts` → `tests/lib/password.test.ts`.
@@ -12,7 +18,8 @@ Conventions for files under `tests/`. (Why testing is set up this way:
   the `/login` flow → `tests/e2e/login.spec.ts`.
 - `tests/mcp/` tests MCP tools over real HTTP (the app served on an ephemeral
   port, driven by an MCP client); one file per tool, named after it (the `ping`
-  tool → `tests/mcp/ping.test.ts`).
+  tool → `tests/mcp/ping.test.ts`), and grouped by tool family to mirror
+  `src/mcp/` (the pantry tools → `tests/mcp/pantry/`).
 
 ## Layers
 

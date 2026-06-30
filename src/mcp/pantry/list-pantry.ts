@@ -2,7 +2,7 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import type { Db } from "@/db/index.js";
 import { loggedTool } from "@/mcp/logged-tool.js";
-import { jsonResult } from "@/mcp/pantry-fields.js";
+import { jsonResult } from "@/mcp/pantry/pantry-fields.js";
 import { PantryItem } from "@/models/pantry.js";
 
 /** Register the `list_pantry` tool: list the caller's pantry items. */
@@ -14,8 +14,10 @@ export function registerListPantry(server: McpServer, db: Db, userId: string) {
     {
       inStockOnly: z
         .boolean()
-        .optional()
-        .describe("When true, return only in-stock items; otherwise return all items."),
+        .default(true)
+        .describe(
+          "Return only in-stock items (the default). Set to false to include consumed items too.",
+        ),
     },
     async ({ inStockOnly }) => {
       const items = inStockOnly

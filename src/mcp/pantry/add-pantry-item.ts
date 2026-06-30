@@ -7,7 +7,7 @@ import {
   nameField,
   statusField,
   stockDateField,
-} from "@/mcp/pantry-fields.js";
+} from "@/mcp/pantry/pantry-fields.js";
 import { PantryItem } from "@/models/pantry.js";
 
 /** Register the `add_pantry_item` tool: add an item to the caller's pantry. */

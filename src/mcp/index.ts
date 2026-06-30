@@ -2,12 +2,8 @@ import { StreamableHTTPTransport } from "@hono/mcp";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { Context } from "hono";
 import type { Db } from "@/db/index.js";
-import { registerAddPantryItem } from "@/mcp/add-pantry-item.js";
-import { registerConsumePantryItem } from "@/mcp/consume-pantry-item.js";
-import { registerListPantry } from "@/mcp/list-pantry.js";
+import { registerPantryTools } from "@/mcp/pantry/index.js";
 import { registerPing } from "@/mcp/ping.js";
-import { registerRemovePantryItem } from "@/mcp/remove-pantry-item.js";
-import { registerUpdatePantryItem } from "@/mcp/update-pantry-item.js";
 import type { AppEnv } from "@/middlewares/session.js";
 
 /**
@@ -18,11 +14,7 @@ import type { AppEnv } from "@/middlewares/session.js";
 export function buildMcpServer(db: Db, userId: string): McpServer {
   const server = new McpServer({ name: "fridge", version: "0.1.0" });
   registerPing(server);
-  registerListPantry(server, db, userId);
-  registerAddPantryItem(server, db, userId);
-  registerUpdatePantryItem(server, db, userId);
-  registerConsumePantryItem(server, db, userId);
-  registerRemovePantryItem(server, db, userId);
+  registerPantryTools(server, db, userId);
   return server;
 }
 

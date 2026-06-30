@@ -1,7 +1,7 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { Db } from "@/db/index.js";
 import { loggedTool } from "@/mcp/logged-tool.js";
-import { idField, notFoundResult, textResult } from "@/mcp/pantry-fields.js";
+import { idField, notFoundResult, textResult } from "@/mcp/pantry/pantry-fields.js";
 import { PantryItem } from "@/models/pantry.js";
 
 /** Register the `remove_pantry_item` tool: permanently delete an item. */
