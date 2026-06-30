@@ -9,7 +9,14 @@ import { type User, users } from "@/db/schema.js";
 const SESSION_COOKIE = "session";
 const SESSION_MAX_AGE = 60 * 60 * 24 * 7; // 7 days
 
-export type AppEnv = { Variables: { user: User | null } };
+export type AppEnv = {
+  Variables: {
+    // Web session user (set by sessionMiddleware). Null when logged out.
+    user: User | null;
+    // MCP caller's user id, resolved from the Bearer token by requireBearer.
+    userId?: string;
+  };
+};
 
 function sessionSecret(): string {
   const secret = process.env["SESSION_SECRET"];
