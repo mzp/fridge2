@@ -17,6 +17,7 @@ import {
   createWellKnownRoutes,
   type OAuthConfig,
 } from "@/routes/oauth/index.js";
+import { createPantryRoutes } from "@/routes/pantry.js";
 
 /**
  * Absolute base URL used as the OAuth issuer and in discovery metadata. Must be
@@ -57,6 +58,7 @@ export function createApp(db: Db) {
   app.route("/", createAuthRoutes(db));
   app.route("/", createHomeRoutes());
   app.route("/", createCalendarRoutes(db));
+  app.route("/", createPantryRoutes(db));
 
   // Test-only: clear app data and re-seed the admin, for E2E isolation between
   // tests. Gated to NODE_ENV=test so it never exists in production.

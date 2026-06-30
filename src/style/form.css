@@ -16,6 +16,10 @@
     @apply rounded border border-danger bg-danger/10 px-3 py-2 text-sm text-danger;
   }
 
+  .form-actions {
+    @apply flex items-center gap-2;
+  }
+
   /* Buttons */
   .btn {
     @apply inline-flex items-center justify-center rounded border font-medium transition-colors;

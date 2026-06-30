@@ -31,8 +31,8 @@ src/
   index.ts        Server entrypoint (in prod: migrate + seed admin, then start Hono)
   app.ts          App assembly and route mounting
   logger.ts       Pino logger (JSON to stdout; pretty in dev)
-  style/          Tailwind source (committed): index.css + theme/navigation/form/
-                  calendar; compiled to public/dist.css
+  style/          Tailwind source (committed): index.css + theme/navigation/page/
+                  form/calendar/pantry; compiled to public/dist.css
   db/
     schema.ts     Drizzle schema
     index.ts      DB connection (reads DATABASE_URL)
@@ -43,9 +43,10 @@ src/
     password.ts   scrypt hash/verify
   mcp/            MCP server (index.ts) + one file per tool (ping.ts); at /mcp
   middlewares/    session.ts (web cookie login), oauth.ts (Bearer guard), logger.ts (request log)
-  routes/         Hono route modules: auth, home, oauth/ (OAuth AS at /oauth +
-                  provider; well-known discovery served at root)
-  views/          hono/html page templates (layout, login, home)
+  models/         Domain models and projections: calendar, pantry
+  routes/         Hono route modules: auth, calendar, home, pantry, oauth/ (OAuth AS
+                  at /oauth + provider; well-known discovery served at root)
+  views/          hono/html page templates (layout, login, calendar, pantry)
 public/           dist.css: the gitignored Tailwind build output, served at /dist.css
 db/
   migrations/     drizzle-kit migrations (committed; the source of truth for prod)

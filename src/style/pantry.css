@@ -1,0 +1,45 @@
+@layer components {
+  .pantry-list {
+    @apply flex flex-col gap-3;
+  }
+
+  .pantry-item {
+    @apply rounded border border-line bg-surface p-4;
+  }
+
+  .pantry-item-main {
+    @apply flex items-center justify-between gap-3;
+  }
+
+  .pantry-item-name {
+    @apply text-lg font-semibold text-ink;
+  }
+
+  .pantry-status {
+    @apply rounded-full px-2 py-1 text-xs font-medium;
+  }
+
+  .pantry-status-in-stock {
+    @apply bg-primary/10 text-primary;
+  }
+
+  .pantry-status-consumed {
+    @apply bg-surface-muted text-ink-muted;
+  }
+
+  .pantry-details {
+    @apply mt-3 grid grid-cols-1 gap-2 text-sm sm:grid-cols-3;
+  }
+
+  .pantry-details dt {
+    @apply text-xs font-medium text-ink-muted;
+  }
+
+  .pantry-details dd {
+    @apply text-ink;
+  }
+
+  .pantry-actions {
+    @apply mt-4 flex items-center gap-2;
+  }
+}

@@ -1,0 +1,21 @@
+@layer components {
+  .page {
+    @apply mx-auto max-w-lg px-4 py-8;
+  }
+
+  .page-heading {
+    @apply mb-6 flex items-center justify-between gap-4;
+  }
+
+  .page-title {
+    @apply mb-6 text-2xl font-bold text-primary;
+  }
+
+  .page-heading .page-title {
+    @apply mb-0;
+  }
+
+  .empty-state {
+    @apply rounded border border-line bg-surface p-6 text-center text-ink-muted;
+  }
+}
