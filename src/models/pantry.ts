@@ -99,6 +99,21 @@ export class PantryItem {
     return rows.length > 0;
   }
 
+  /**
+   * A plain JSON view of the item with its computed expiry date — what MCP tools
+   * (and any future API) hand back, so callers don't reach into the raw row.
+   */
+  toSummary() {
+    return {
+      id: this.row.id,
+      name: this.row.name,
+      stockDate: this.row.stockDate,
+      bestBeforeDays: this.row.bestBeforeDays,
+      status: this.row.status as PantryStatus,
+      expiryDate: this.expiryDate()?.toString() ?? null,
+    };
+  }
+
   /** The day this item goes off, or null when expiry isn't tracked. */
   expiryDate(): Temporal.PlainDate | null {
     const { stockDate, bestBeforeDays } = this.row;

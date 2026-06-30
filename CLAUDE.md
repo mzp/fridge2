@@ -41,8 +41,11 @@ src/
     seed-dev.ts   seedPantry: dev/test-only sample data (never run in prod)
   lib/
     password.ts   scrypt hash/verify
-  mcp/            MCP server (index.ts) + one file per tool (ping.ts); at /mcp
-  middlewares/    session.ts (web cookie login), oauth.ts (Bearer guard), logger.ts (request log)
+  mcp/            MCP server (index.ts) + one file per tool (ping.ts; pantry CRUD:
+                  list-pantry/add-/update-/consume-/remove-pantry-item.ts, shared
+                  fields in pantry-fields.ts); at /mcp
+  middlewares/    session.ts (web cookie login), oauth.ts (Bearer guard; sets
+                  c.var.userId from the token), logger.ts (request log)
   models/         Domain models and projections: calendar, pantry
   routes/         Hono route modules: auth, calendar, home, pantry, oauth/ (OAuth AS
                   at /oauth + provider; well-known discovery served at root)
